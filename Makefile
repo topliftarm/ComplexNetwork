@@ -1,3 +1,4 @@
+
 CXX=g++
 CXXFLAGS  = -std=c++11 -O2 -fPIC -c -fopenmp
 SWIGFLAGS = -c++ -python -shadow  
@@ -24,12 +25,7 @@ $(TARGET)_wrap.cpp : $(TARGET).i
 	swig $(SWIGFLAGS) -o $(TARGET)_wrap.cpp $(TARGET).i 
 
 clean :
-	rm  ../data/f/*
-
-eradicate:
 	rm *.o  *.so $(TARGET)_wrap.cpp $(TARGET).py *.pyc ../data/f/* 
-
-.PHONEY : clean eradicate
 
 
 

@@ -1,3 +1,4 @@
+
 import ode_solver
 import pylab as pl 
 import numpy as np 
@@ -5,6 +6,7 @@ from time  import time
 from network import make_graph
 from modules import *
 from numpy import pi
+
 
 print("configuration...\n")
 seed = 12358
@@ -15,16 +17,16 @@ NumberOfNodes = 100
 graph  = make_graph()
 couplingStrength = 0.23
 
-tfinal = 5000.0
+tfinal = 10000.0
 tinitial = 0.0
-dt = 0.05
+dt = 0.1
 times = np.arange(0,tfinal, dt)
 
 #R = np.zeros(times)
 
 PLOT_RT = True # False
 if PLOT_RT:
-	figrt, axrt = pl.subplots(1, figsize=(10, 10))
+	figrt, axrt = pl.subplots(1, figsize=(7, 7))
 	rt = []
 print("configuration...done\n")
 print("create graph...\n")
@@ -37,8 +39,8 @@ InitialCondition = np.random.uniform(-pi/2.0, pi/2.0, NumberOfNodes).tolist()
 print("create graph...done")
 print("start simulation...")
 obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, InitialCondition, Omega)
-obj.set_matrices(Adj)
-sol = obj.integrate()
+#obj.set_matrices(Adj)
+sol = obj.integrate(Adj)
 sol = np.asarray(sol)
 r_glob, psi = obj.get_order_parameters()
 print("simulation...done")

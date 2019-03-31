@@ -46,12 +46,12 @@ public:
 //   dim2 get_coordinates();
   dim2 reshape_2d(const dim1& X1D);
 
-  void integrate ();
+  void integrate(const dim1& iAdj);
   dim1 dydt(const dim1 &x);
   dim1 order_parameter(const dim1& x);
   dim1 order_parameter_k(const dim1 &x);
   dim2 get_order_parameters();
-
+  void calDegree();
   void set_matrices(const dim1& iAdj);
 
   dim1 IC;
