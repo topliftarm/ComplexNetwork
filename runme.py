@@ -17,7 +17,7 @@ NumberOfNodes = 100
 graph  = make_graph()
 couplingStrength = 0.23
 
-tfinal = 10000.0
+tfinal = 100.0
 tinitial = 0.0
 dt = 0.1
 times = np.arange(0,tfinal, dt)
@@ -43,6 +43,7 @@ obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, InitialConditi
 sol = obj.integrate(Adj)
 sol = np.asarray(sol)
 r_glob, psi = obj.get_order_parameters()
+acceptanceRateRewiring = obj.getAcceptanceRewiring()
 print("simulation...done")
 if PLOT_RT:
      axrt.plot(times, r_glob, lw=2)

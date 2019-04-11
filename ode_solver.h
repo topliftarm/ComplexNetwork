@@ -40,17 +40,20 @@ public:
   dim1 Psi1;
   dim1 Psi2;
   dim1 Degree;
+  dim1 AcceptanceRateRewiring;
   void euler_integrator(dim1 & );
-  void runge_kutta4_integrator(dim1 &);
+  dim1 runge_kutta4_integrator(dim1 y, dim2 CijLocal);
+  dim2 rewiring(int indexFocusNode, dim1 nodesOrder);
 
 //   dim2 get_coordinates();
   dim2 reshape_2d(const dim1& X1D);
 
   void integrate(const dim1& iAdj);
-  dim1 dydt(const dim1 &x);
+  dim1 dydt(const dim1 &x, dim2 CijLocal);
   dim1 order_parameter(const dim1& x);
   dim1 order_parameter_k(const dim1 &x);
   dim2 get_order_parameters();
+  dim1 getAcceptanceRewiring();
   void calDegree();
   void set_matrices(const dim1& iAdj);
 
