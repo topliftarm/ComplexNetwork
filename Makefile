@@ -15,9 +15,11 @@ HFILES= ode_solver.h
 _$(TARGET).so: $(OBJS)
 	$(CXX) -shared -fopenmp $(OBJS) -o _$(TARGET).so
  
-$(TARGET)_wrap.o: $(TARGET)_wrap.cpp $(HFILES)
-	$(CXX) $(CXXFLAGS) $(TARGET)_wrap.cpp -I $(PYTHON_INCLUDE) 
 
+$(TARGET)_wrap.o: $(TARGET)_wrap.cpp $(HFILES)
+	$(CXX) $(CXXFLAGS) `pkg-config --cflags --libs python3` $(TARGET)_wrap.cpp -I $(PYTHON_INCLUDE) 
+	
+	
 $(TARGET).o: $(TARGET).cpp  $(TARGET).h
 	$(CXX) $(CXXFLAGS) $(TARGET).cpp
 
