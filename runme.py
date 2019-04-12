@@ -1,4 +1,4 @@
-
+    
 import ode_solver
 import pylab as pl 
 import numpy as np 
@@ -6,7 +6,7 @@ from time  import time
 from network import make_graph
 from modules import *
 from numpy import pi
-
+import matplotlib.pyplot as plt
 
 print("configuration...\n")
 seed = 12358
@@ -44,6 +44,14 @@ sol = obj.integrate(Adj)
 sol = np.asarray(sol)
 r_glob, psi = obj.get_order_parameters()
 acceptanceRateRewiring = obj.getAcceptanceRewiring()
+MeanY = obj.getMeanY();
+
+plt.figure(figsize=(8, 6), dpi=80)
+plt.plot(acceptanceRateRewiring)
+plt.figure(figsize=(8, 6), dpi=80)
+plt.plot(MeanY)
+plt.show()
+
 print("simulation...done")
 if PLOT_RT:
      axrt.plot(times, r_glob, lw=2)
@@ -51,6 +59,9 @@ if PLOT_RT:
  
 #R[i] += np.mean(r_glob[id_tcut:])
 del obj, sol
+
+
+
 
 
 #R *= inv_num_sim

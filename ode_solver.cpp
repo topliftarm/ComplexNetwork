@@ -8,7 +8,16 @@
 #include "math.h"
 #define M_PI 3.14159265358979323846
 
+#include <numeric>
+
+
+
 //std::ofstream cout("/home/vahid/Documents/Complex network/c/output.txt");
+double ODE::Mean(dim1& vector){
+    double sum = std::accumulate(vector.begin(), vector.end(), 0.0);
+    double mean = sum / vector.size();
+    return mean;
+}
 
 /*------------------------------------------------------------*/
 void ODE::integrate(const dim1& iAdj) 
@@ -18,7 +27,7 @@ void ODE::integrate(const dim1& iAdj)
     calDegree();
 
     dim1 y = IC;
-    dim1 MeanY;
+
     Order1.resize(num_steps);
     Psi1.resize(num_steps);
     Order2.resize(num_steps);
@@ -37,14 +46,13 @@ void ODE::integrate(const dim1& iAdj)
     for (auto i = nodesOrder.begin(); i != nodesOrder.end(); ++i) 
         std::cout << *i << " "; 
     */
-    int j = 0;
-    std::cout<<"\nin integrate befor for step";
+    
     
     for (int step = 0; step < num_steps; ++step){
         std::random_shuffle(nodesOrder.begin(), nodesOrder.end());
         sumAcceptanceRewirig = 0;
-        
-        for(j=0; j<N; j++){
+        MeanY.push_back(Mean(y));
+        for(int j=0; j<N; j++){
             RGlobalBeforeRewiring = order_parameter(y);
             NewCij = rewiring(nodesOrder[j], nodesOrder);
             NewY = runge_kutta4_integrator(y, NewCij);    
@@ -227,6 +235,10 @@ dim2 ODE::get_order_parameters()
 /*------------------------------------------------------------*/
 dim1 ODE::getAcceptanceRewiring(){
     return AcceptanceRateRewiring;
+}
+/*------------------------------------------------------------*/
+dim1 ODE::getMeanY(){
+    return MeanY;
 }
 /*------------------------------------------------------------*/
 // dim2   ODE::get_coordinates() 
