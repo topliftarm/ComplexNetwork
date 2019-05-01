@@ -22,20 +22,15 @@ tinitial = 0.0
 dt = 0.1
 times = np.arange(0,tfinal, dt)
 
-#R = np.zeros(times)
-
-PLOT_RT = True # False
-if PLOT_RT:
-	figrt, axrt = pl.subplots(1, figsize=(7, 7))
-	rt = []
 print("configuration...done\n")
 print("create graph...\n")
+#Adj = graph.erdos_renyi_graph(NumberOfNodes, 0.1)
 Adj = graph.random_k_out_graph(NumberOfNodes, 6, seed=np.random.randint(100000))
 adj_mat = np.asarray(Adj).reshape((NumberOfNodes, NumberOfNodes))
 #degree = np.sum(adj_mat, axis=1)
 
-Omega = np.random.uniform(-1, 1, size=NumberOfNodes).tolist()
-InitialCondition = np.random.uniform(-pi/2.0, pi/2.0, NumberOfNodes).tolist()
+Omega = np.random.uniform(0, 2*pi, size=NumberOfNodes).tolist()
+InitialCondition = np.random.uniform(0, 2*pi, NumberOfNodes).tolist()
 print("create graph...done")
 print("start simulation...")
 obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, InitialCondition, Omega)
@@ -44,39 +39,30 @@ sol = obj.integrate(Adj)
 sol = np.asarray(sol)
 r_glob, psi = obj.get_order_parameters()
 acceptanceRateRewiring = obj.getAcceptanceRewiring()
-MeanY = obj.getMeanY();
+MeanYPrime = obj.getMeanYPrime();
 
-plt.figure(figsize=(8, 6), dpi=80)
+
+# -----------------------  Plotes -----------------
+sizeFig = (9,7)
+_dpi = 80
+plt.figure(figsize=sizeFig, dpi=_dpi)
 plt.plot(acceptanceRateRewiring)
-plt.figure(figsize=(8, 6), dpi=80)
-plt.plot(MeanY)
-plt.show()
+plt.title('acceptanceRateRewiring_selfish')
+#plt.savefig('acceptanceRateRewiring_selfish.png')
+
+plt.figure(figsize=sizeFig, dpi=_dpi)
+plt.plot(MeanYPrime)
+plt.title('MeanYPrime_selfish')
+#plt.savefig('MeanYPrime_selfish.png')
+
+plt.figure(figsize=sizeFig, dpi=_dpi)
+plt.plot(r_glob)
+plt.title('r_glob_selfish')
+#plt.savefig('r_glob_selfish.png')
+# plt.show()
 
 print("simulation...done")
-if PLOT_RT:
-     axrt.plot(times, r_glob, lw=2)
-     rt.append(r_glob)
- 
-#R[i] += np.mean(r_glob[id_tcut:])
 del obj, sol
-
-
-
-
-
-#R *= inv_num_sim
-
-if PLOT_RT:
-	axrt.set_ylabel("R(t)")
-	axrt.set_xlabel("time")
-	pl.savefig(adrsf+"rt.png")
-	rt = np.asarray(rt)
-	rt = rt.T
-	rtfile = open(adrsf+"rt.txt", "w")
-	for i in range(len(times)):
-		rtfile.write("%15.4f" % times[i])
-		rtfile.write("\n")
-	rtfile.close()
 # ----------------------------------------- #
 display_time(time()-start)
 # ----------------------------------------- #

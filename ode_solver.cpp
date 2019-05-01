@@ -6,27 +6,28 @@
 #include <iostream>
 #include "ode_solver.h"
 #include "math.h"
+#include <numeric>
 #define M_PI 3.14159265358979323846
 
-#include <numeric>
-
-
-
-//std::ofstream cout("/home/vahid/Documents/Complex network/c/output.txt");
-double ODE::Mean(dim1& vector){
-    double sum = std::accumulate(vector.begin(), vector.end(), 0.0);
-    double mean = sum / vector.size();
+double ODE::Mean(const dim1& vector, bool half=false){
+    double mean;
+    if (half){
+        double sum = std::accumulate(vector.begin()+ceil(vector.size()/2), vector.end(), 0.0);
+        mean = sum / ceil(vector.size()/2);    
+    }
+    else{
+        double sum = std::accumulate(vector.begin(), vector.end(), 0.0);
+        mean = sum / vector.size();
+    }
+    
     return mean;
 }
-
 /*------------------------------------------------------------*/
 void ODE::integrate(const dim1& iAdj) 
 {   
     dim2 NewCij = reshape_2d(iAdj);
     Cij = reshape_2d(iAdj);
     calDegree();
-
-    dim1 y = IC;
 
     Order1.resize(num_steps);
     Psi1.resize(num_steps);
@@ -37,32 +38,54 @@ void ODE::integrate(const dim1& iAdj)
     int sumAcceptanceRewirig;
     std::cout.precision(3);
     dim1 NewY = IC;
+    dim1 y = IC;
     dim1 RGlobalBeforeRewiring, RGlobalAfterRewiring;
     std::srand(unsigned(std::time(0)));
+    
     dim1 nodesOrder;
-    for(int i=0; i<N; i++)
-        nodesOrder.push_back(i);
-    /*
-    for (auto i = nodesOrder.begin(); i != nodesOrder.end(); ++i) 
-        std::cout << *i << " "; 
-    */
+    for(int i = 0; i < N; i++)
+        nodesOrder.push_back(i);   
     
+    double lastPushMeanYPrime, OldOmega, NewOmega;
     
-    for (int step = 0; step < num_steps; ++step){
+    for(int step = 0; step < num_steps; ++step){
         std::random_shuffle(nodesOrder.begin(), nodesOrder.end());
         sumAcceptanceRewirig = 0;
-        MeanY.push_back(Mean(y));
+        lastPushMeanYPrime = Mean(dydt(y, Cij));
+        MeanYPrime.push_back(lastPushMeanYPrime);
+        /// local strategy
         for(int j=0; j<N; j++){
-            RGlobalBeforeRewiring = order_parameter(y);
+            OldOmega = Mean(MeanYPrime, true);
             NewCij = rewiring(nodesOrder[j], nodesOrder);
-            NewY = runge_kutta4_integrator(y, NewCij);    
-            RGlobalAfterRewiring = order_parameter(NewY);
-            if(RGlobalAfterRewiring[0] > RGlobalBeforeRewiring[0]){
+            NewY = runge_kutta4_integrator(y, NewCij);   
+            lastPushMeanYPrime = MeanYPrime.back();
+            MeanYPrime.pop_back();
+            MeanYPrime.push_back(Mean(dydt(NewY, NewCij))); 
+            NewOmega = Mean(MeanYPrime, true);
+            if(abs(Omega[nodesOrder[j]]-OldOmega) > abs(Omega[nodesOrder[j]]-NewOmega) ){
                 Cij = NewCij;
-                //y = NewY;
+                y = NewY;
                 sumAcceptanceRewirig++;
             }
+            else{
+                MeanYPrime.pop_back();
+                MeanYPrime.push_back(lastPushMeanYPrime);            
+            }
         }
+        
+        //global strategy
+        /*
+        for(int j=0; j<N; j++){
+			RGlobalBeforeRewiring = order_parameter(y);
+			NewCij = rewiring(nodesOrder[j], nodesOrder);
+			NewY = runge_kutta4_integrator(y, NewCij);    
+			RGlobalAfterRewiring = order_parameter(NewY);
+			if(RGlobalAfterRewiring[0] > RGlobalBeforeRewiring[0]){
+				Cij = NewCij;
+				sumAcceptanceRewirig++;
+			}
+		}*/
+        
         AcceptanceRateRewiring.push_back(sumAcceptanceRewirig);
         //std::cout<<"step="<<step<<"\n";
         r1 = order_parameter(y);
@@ -193,17 +216,17 @@ void ODE::set_matrices(const dim1& iAdj)
 /*------------------------------------------------------------*/
 dim1 ODE::order_parameter(const dim1& x)
 {
-    int    n      = x.size();
+    int n = x.size();
     double real_R = 0.;
     double imag_R = 0.;
-    for (int i=0; i<n; i++) 
+    for(int i=0; i<n; i++) 
     {
         real_R += cos(x[i]);
         imag_R += sin(x[i]);
     }
     real_R /= (double) n;
     imag_R /= (double) n;
-    double r   = sqrt(real_R * real_R + imag_R * imag_R);
+    double r = sqrt(real_R * real_R + imag_R * imag_R);
     double psi = atan2(imag_R,real_R);
     dim1 result{r, psi};
     return result;
@@ -237,8 +260,8 @@ dim1 ODE::getAcceptanceRewiring(){
     return AcceptanceRateRewiring;
 }
 /*------------------------------------------------------------*/
-dim1 ODE::getMeanY(){
-    return MeanY;
+dim1 ODE::getMeanYPrime(){
+    return MeanYPrime;
 }
 /*------------------------------------------------------------*/
 // dim2   ODE::get_coordinates() 

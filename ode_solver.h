@@ -48,9 +48,11 @@ public:
 //   dim2 get_coordinates();
   dim2 reshape_2d(const dim1& X1D);
   
-  dim1 MeanY;
-  double Mean(dim1&);
-  dim1 getMeanY();
+  dim1 MeanYPrime;
+  double Mean(const dim1&, bool);
+  dim1 getMeanYPrime();
+  
+  
 
   void integrate(const dim1& iAdj);
   dim1 dydt(const dim1 &x, dim2 CijLocal);
