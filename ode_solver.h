@@ -3,7 +3,6 @@
 #include <iostream>
 #include <algorithm>
 #include <assert.h>
-
 typedef std::vector<double> dim1;
 typedef std::vector<std::vector<double> > dim2;
 
@@ -18,13 +17,14 @@ class ODE {
   int num_steps;
   dim2 Coordinates;
   dim1 Omega;
-  int sum_degree;
+  int sum_degree, NumbertOfSteps, NumberOfIterations;
   double couplingStrength;
+  dim1 createSelfishList(int NumberOfSelfishNodes, dim1 NodesOrder);
 
 public:
-  ODE(int iN, double itfinal, 
-      double idt, 
-      double iCouplingStrength, dim1 iIC, dim1 iOmega) : N(iN), dt(idt) 
+  ODE(int iN, double itfinal,
+      double idt,
+      double iCouplingStrength, dim1 iIC, dim1 iOmega, int _NumbertOfSteps, int _NumberOfIterations) : N(iN), dt(idt)
   {
     tfinal = itfinal;
     num_steps = int(tfinal/dt);
@@ -32,6 +32,9 @@ public:
     Omega = iOmega;
     //K_Over_N = iK / (N+0.0);
     couplingStrength = iCouplingStrength;
+    NumbertOfSteps = _NumbertOfSteps;
+    NumberOfIterations = _NumberOfIterations;
+
   }
   virtual ~ODE() { }
   dim2 Cij;
@@ -43,25 +46,30 @@ public:
   dim1 AcceptanceRateRewiring;
   void euler_integrator(dim1 & );
   dim1 runge_kutta4_integrator(dim1 y, dim2 CijLocal);
-  dim2 rewiring(int indexFocusNode, dim1 nodesOrder);
+  dim2 rewiring(int indexFocusNode, dim1 nodesOrder, dim2);
+  void Print2D(dim2);
+  void Print1D(dim1);
 
+  dim1 FinalY;
 //   dim2 get_coordinates();
   dim2 reshape_2d(const dim1& X1D);
-  
-  dim1 MeanYPrime;
-  double Mean(const dim1&, bool);
-  dim1 getMeanYPrime();
-  
-  
 
-  void integrate(const dim1& iAdj);
+  double Mean(const dim1&, int);
+  dim1 getMeanYPrime();
+  dim1 getFinalY();
+  dim1 runDynamics(int, dim2, dim1, dim1&);
+
+  dim1 MeanRinEachIteration;
+  void integrate(const dim1& iAdj, bool rewire, bool selfish, int NumberOfSelfishNodes);
   dim1 dydt(const dim1 &x, dim2 CijLocal);
   dim1 order_parameter(const dim1& x);
   dim1 order_parameter_k(const dim1 &x);
   dim2 get_order_parameters();
   dim1 getAcceptanceRewiring();
+  dim1 getMeanRinEachIteration();
   void calDegree();
   void set_matrices(const dim1& iAdj);
+  dim1 getCij();
 
   dim1 IC;
 };
