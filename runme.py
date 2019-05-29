@@ -138,4 +138,5 @@ while(runNumber < 3): #hour < 14):
     hour = currentTime.hour;
     runNumber += 1
 
-os.system("mpg123 "+" finish.mp3")
+if (motherDirPath === "/home/vahid/Documents/Complex network/c/CompleteData"):
+    os.system("mpg123 "+" finish.mp3")
