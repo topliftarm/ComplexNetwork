@@ -52,22 +52,15 @@ def createDir(runNumber, motherDirPath):
     currentPath = motherDirPath+"/"+dirName
     return currentPath
 
-def saveInitialData(currentPath):
-    print("saving Initialization data ...")
-    with open(currentPath+'/'+'Config.txt', 'w+') as ConfigFile:
-        ConfigFile.write("NumberOfNodes= %d\r\n" % NumberOfNodes)
-        ConfigFile.write("couplingStrength= %f\r\n" % couplingStrength)
-        ConfigFile.write("NumberOfIterations= %d\r\n" % NumberOfIterations)
-        ConfigFile.write("NumbertOfSteps= %d\r\n" % NumbertOfSteps)
-    with open(currentPath+'/'+'InitAdj.txt', 'w+') as InitAdjFile:
-        np.savetxt(InitAdjFile, adj_mat)
-    with open(currentPath+'/'+'Omega.txt', 'w+') as OmegaFile:
-        np.savetxt(OmegaFile, np.array(Omega).T)
-    with open(currentPath+'/'+'Y0.txt', 'w+') as Y0File:
-        np.savetxt(Y0File, np.array(InitialCondition).T)
-    with open(currentPath+'/'+'InitialSumKin.txt', 'w+') as InitialSumKinFile:
-        np.savetxt(InitialSumKinFile, np.array(InitialSumKin).T)
-    print("saving Initialization data ... done")
+def saveData(saveList):
+    print("saving data ...")
+    for _FileName, _Content in saveList.items():
+        with open(currentPath+'/'+_FileName, 'w+') as File:
+            if (np.array(_Content).ndim > 0):
+                np.savetxt(File, np.array(_Content))
+            else:
+                File.write(str(_Content))
+    print("saving data ... done")
 
 def getParametersFromC():
     r_glob, psi = obj.get_order_parameters()
@@ -85,31 +78,7 @@ def getParametersFromC():
     return (r_glob, psi, MeanRinEachIteration, acceptanceRateRewiring, finalAdj,
             finalY, final_adj_mat, sumKin, sumKin_bin_means, sliceOfOmega)
 
-def saveFinalData(currentPath):
-    print("saving Results ...")
-    #if (os.path.isfile("/home/vahid/Documents/Complex network/c/src/output.txt")):
-    #    shutil.move("/home/vahid/Documents/Complex network/c/src/output.txt",
-    #            currentPath+"/"+"output.txt")
-    with open(currentPath+'/'+'FinalAdj.txt', 'w+') as FinalAdjFile:
-        np.savetxt(FinalAdjFile, final_adj_mat)
-    with open(currentPath+'/'+'acceptanceRateRewiring.txt', 'w+') as acceptanceRateRewiringFile:
-        np.savetxt(acceptanceRateRewiringFile, np.array(acceptanceRateRewiring).T)
-    with open(currentPath+'/'+'MeanRinEachIteration.txt', 'w+') as MeanRinEachIterationFile:
-        np.savetxt(MeanRinEachIterationFile, np.array(MeanRinEachIteration).T)
-    with open(currentPath+'/'+'finalY.txt', 'w+') as finalYFile:
-        np.savetxt(finalYFile, np.array(finalY).T)
-    with open(currentPath+'/'+'r_glob.txt', 'w+') as r_globFile:
-        np.savetxt(r_globFile, np.array(r_glob).T)
-    with open(currentPath+'/'+'sumKin.txt', 'w+') as sumKinFile:
-        np.savetxt(sumKinFile, np.array(sumKin).T)
-    with open(currentPath+'/'+'sumKin_bin_means.txt', 'w+') as sumKin_bin_meansFile:
-        np.savetxt(sumKin_bin_meansFile, np.array(sumKin_bin_means).T)
-    with open(currentPath+'/'+'sliceOfOmega.txt', 'w+') as sliceOfOmegaFile:
-        np.savetxt(sliceOfOmegaFile, np.array(sliceOfOmega).T)
-    print("saving Results ... done")
-
 # ===================================== --------- ========================
-
 
 make()
 NumberOfNodes, NumberOfEdges, couplingStrength, \
@@ -127,7 +96,17 @@ motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData"
 runNumber = 1
 while(runNumber < 3): #hour < 14):
     currentPath = createDir(runNumber, motherDirPath)
-    saveInitialData(currentPath)
+    initialList = {
+        'NumberOfNodes.txt':NumberOfNodes,
+        'couplingStrength.txt':couplingStrength,
+        'NumberOfIterations.txt':NumberOfIterations,
+        'NumbertOfSteps.txt':NumbertOfSteps,
+        'InitAdj.txt':adj_mat,
+        'Omega.txt':np.array(Omega).T,
+        'Y0.txt':np.array(InitialCondition).T,
+        'InitialSumKin.txt':np.array(InitialSumKin).T
+    }
+    saveData(initialList)
     print("start simulation...")
     if (runNumber == 1):
         obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
@@ -143,12 +122,20 @@ while(runNumber < 3): #hour < 14):
     sliceOfOmega = getParametersFromC()
     print("simulation...done")
     del obj, sol
-    saveFinalData(currentPath)
+    finalList = {
+        'FinalAdj.txt':final_adj_mat,
+        'acceptanceRateRewiring.txt':np.array(acceptanceRateRewiring).T,
+        'MeanRinEachIteration.txt':np.array(MeanRinEachIteration).T,
+        'finalY.txt':np.array(finalY).T,
+        'r_glob.txt':np.array(r_glob).T,
+        'sumKin.txt':np.array(sumKin).T,
+        'sumKin_bin_means.txt':np.array(sumKin_bin_means).T,
+        'sliceOfOmega.txt':np.array(sliceOfOmega).T
+    }
+    saveData(finalList)
     display_time(time()-start)
     currentTime = datetime.datetime.now()
     hour = currentTime.hour;
     runNumber += 1
-
-
 
 os.system("mpg123 "+" finish.mp3")
