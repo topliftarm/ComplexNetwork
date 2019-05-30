@@ -34,8 +34,8 @@ def configParameters():
     NumberOfNodes = 100
     NumberOfEdges = 6
     couplingStrength = 0.27
-    NumberOfIterations = 500
-    NumbertOfSteps = 200
+    NumberOfIterations = 50000
+    NumbertOfSteps = 500
     tfinal = 100.0
     tinitial = 0.0
     dt = 0.1
@@ -63,7 +63,7 @@ def saveData(saveList):
     print("saving data ... done")
 
 def getParametersFromC():
-    r_glob, psi = obj.get_order_parameters()
+    #r_glob, psi = obj.get_order_parameters()
     MeanRinEachIteration = obj.getMeanRinEachIteration()
     acceptanceRateRewiring = obj.getAcceptanceRewiring()
     #MeanYPrime = obj.getMeanYPrime();
@@ -75,7 +75,7 @@ def getParametersFromC():
     digitized = np.digitize(Omega, _bins)
     sumKin_bin_means = [sumKin[digitized == i].mean() for i in range(1, len(_bins)+1)]
     sliceOfOmega = _bins
-    return (r_glob, psi, MeanRinEachIteration, acceptanceRateRewiring, finalAdj,
+    return (MeanRinEachIteration, acceptanceRateRewiring, finalAdj,
             finalY, final_adj_mat, sumKin, sumKin_bin_means, sliceOfOmega)
 
 # ===================================== --------- ========================
@@ -93,8 +93,8 @@ hour = currentTime.hour;
 start = time()
 #motherDirPath = "/storage/users/fbaharifard/ComplexNetworks/CompleteData"
 motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData"
-runNumber = 1
-while(runNumber < 3): #hour < 14):
+runNumber = 0
+while(runNumber < 1): #hour < 14):
     currentPath = createDir(runNumber, motherDirPath)
     initialList = {
         'NumberOfNodes.txt':NumberOfNodes,
@@ -108,16 +108,21 @@ while(runNumber < 3): #hour < 14):
     }
     saveData(initialList)
     print("start simulation...")
+    obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
+                   InitialCondition, Omega, NumbertOfSteps, NumberOfIterations)
+    sol = obj.integrate(Adj, rewire=True, selfish=False, NumberOfSelfishNodes=NumberOfNodes)
+    '''
     if (runNumber == 1):
         obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
                    InitialCondition, Omega, NumbertOfSteps, NumberOfIterations)
-        sol = obj.integrate(Adj, rewire=True, selfish=True, NumberOfSelfishNodes=0)
+        sol = obj.integrate(Adj, rewire=True, selfish=False, NumberOfSelfishNodes=0)
     else:
         obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
                    InitialCondition, Omega, NumbertOfSteps, NumberOfIterations)
         sol = obj.integrate(Adj, rewire=True, selfish=False, NumberOfSelfishNodes=2)
+    '''
     sol = np.asarray(sol)
-    r_glob, psi, MeanRinEachIteration, acceptanceRateRewiring, \
+    MeanRinEachIteration, acceptanceRateRewiring, \
     finalAdj,finalY, final_adj_mat, sumKin, sumKin_bin_means, \
     sliceOfOmega = getParametersFromC()
     print("simulation...done")
@@ -127,7 +132,7 @@ while(runNumber < 3): #hour < 14):
         'acceptanceRateRewiring.txt':np.array(acceptanceRateRewiring).T,
         'MeanRinEachIteration.txt':np.array(MeanRinEachIteration).T,
         'finalY.txt':np.array(finalY).T,
-        'r_glob.txt':np.array(r_glob).T,
+        #'r_glob.txt':np.array(r_glob).T,
         'sumKin.txt':np.array(sumKin).T,
         'sumKin_bin_means.txt':np.array(sumKin_bin_means).T,
         'sliceOfOmega.txt':np.array(sliceOfOmega).T
@@ -138,5 +143,5 @@ while(runNumber < 3): #hour < 14):
     hour = currentTime.hour;
     runNumber += 1
 
-if (motherDirPath === "/home/vahid/Documents/Complex network/c/CompleteData"):
+if (motherDirPath == "/home/vahid/Documents/Complex network/c/CompleteData"):
     os.system("mpg123 "+" finish.mp3")
