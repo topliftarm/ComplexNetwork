@@ -69,6 +69,7 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
           TotalAcceptedRewiring = 0;
 	        int TotalSelfishRewiringAccepted = 0;
 	        TotalRewiring = 0;
+          MeanYPrimeAccepted.clear();
           y = runDynamics(NumbertOfSteps, Cij, IC, MeanYPrimeAccepted);
 	        OmegaGama = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
           OldAcceptedY = y;
@@ -86,33 +87,39 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
               //logfile<<" -- Iteration = "<<i<<"\n";
               std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
               randomNode = CopyOfNodesOrder[0];
+              Order1.clear();
+              Psi1.clear();
               NewCij = rewiring(randomNode, nodesOrder, Cij);
               TotalRewiring++;
-              NewY = runDynamics(NumbertOfSteps, NewCij, y, MeanYPrimeAccepted);
+              MeanYPrimeAccepted.clear();
+              //NewY = runDynamics(NumbertOfSteps, NewCij, y, MeanYPrimeAccepted);
+              NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrimeAccepted);
               OmegaGamaPrime = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
               averageRafterRewiring = Mean(Order1,ceil(NumbertOfSteps/2));
               MeanRinEachIteration.push_back(averageRafterRewiring);
               if(std::find(selfishNodes.begin(), selfishNodes.end(), randomNode)!= selfishNodes.end()){//Selfish check
-		              std::cout<<"Checking Selfish Node "<<randomNode<<" ";
-	                 //logfile<<"Checking Selfish Node "<<randomNode<<" ";
+                 //std::cout<<"Selfish check ********************* \n";
                  if(abs(Omega[randomNode]-OmegaGamaPrime)<abs(Omega[randomNode]-OmegaGama)){
                      OmegaGama = OmegaGamaPrime;
                      Cij = NewCij;
                      y = NewY;
+                     OldAcceptedY = y;
                      sumAcceptanceRewirig++;
-		                 std::cout<<"Accepted ++ \n";
-		                 //logfile<<"Accepted ++\n";
+                     TotalAcceptedRewiring++;
+                     averageRbeforRewiring = averageRafterRewiring;
 		                 TotalSelfishRewiringAccepted++;
-                 }else std::cout<<"NotAccepted \n";
+                     //std::cout<<"Accepted\n";
+                 }else y = OldAcceptedY;
               }else{ //NonSelfish check
+                    std::cout<<"NonSelfish check\n";
                     if (averageRbeforRewiring < averageRafterRewiring){
+                       OmegaGama = OmegaGamaPrime;
                        Cij = NewCij;
                        averageRbeforRewiring = averageRafterRewiring;
                        sumAcceptanceRewirig++;
                        TotalAcceptedRewiring++;
                        y = NewY;
                        OldAcceptedY = y;
-                       OmegaGama = OmegaGamaPrime;
                        }else
                        y = OldAcceptedY;
               }
@@ -120,8 +127,7 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
                   AcceptanceRateRewiring.push_back(sumAcceptanceRewirig);
                   sumAcceptanceRewirig = 0;
               }
-              std::cout<<"TotalSelfishRewiringAccepted = "<<TotalSelfishRewiringAccepted<<"\n";
-              //logfile<<"Total Selfish Rewiring Accepted = "<<TotalSelfishRewiringAccepted<<"\n";
+              //std::cout<<"TotalSelfishRewiringAccepted = "<<TotalSelfishRewiringAccepted<<"\n";
           }//end !selfish
       }else if (selfish){//selfish
           std::cout<<" ** in the selfish **"<<"\n";
@@ -369,6 +375,7 @@ dim2 ODE::get_order_parameters()
 }
 /*------------------------------------------------------------*/
 dim1 ODE::getAcceptanceRewiring(){
+    if(AcceptanceRateRewiring.size()==0) AcceptanceRateRewiring.push_back(0);
     return AcceptanceRateRewiring;
 }
 /*------------------------------------------------------------*/
