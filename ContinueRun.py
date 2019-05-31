@@ -35,7 +35,7 @@ def configParameters():
     NumberOfNodes = 100
     NumberOfEdges = 6
     couplingStrength = 0.27
-    NumberOfIterations = 50000
+    NumberOfIterations = 10000
     NumbertOfSteps = 1000
     NumberOfSelfishNodes = NumberOfNodes
     tfinal = 100.0

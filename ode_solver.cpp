@@ -44,7 +44,6 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
     int TotalRewiring, TotalAcceptedRewiring;
     dim2 NewCij;
     Cij = reshape_2d(iAdj);
-    ///calDegree();
     int sumAcceptanceRewirig=0;
     std::cout.precision(10);
     dim1 y, NewY, OldAcceptedY, MeanYPrimeAccepted;
@@ -72,7 +71,7 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
           MeanYPrimeAccepted.clear();
           y = runDynamics(NumbertOfSteps, Cij, IC, MeanYPrimeAccepted);
 	        OmegaGama = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
-          OldAcceptedY = y;
+          //OldAcceptedY = y;
           averageRbeforRewiring = Mean(Order1, ceil(NumbertOfSteps/2));
           MeanRinEachIteration.push_back(averageRbeforRewiring);
 	        dim1 selfishNodes;
@@ -98,18 +97,18 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
               averageRafterRewiring = Mean(Order1,ceil(NumbertOfSteps/2));
               MeanRinEachIteration.push_back(averageRafterRewiring);
               if(std::find(selfishNodes.begin(), selfishNodes.end(), randomNode)!= selfishNodes.end()){//Selfish check
-                 //std::cout<<"Selfish check ********************* \n";
+                 std::cout<<"Selfish check *** \n";
                  if(abs(Omega[randomNode]-OmegaGamaPrime)<abs(Omega[randomNode]-OmegaGama)){
                      OmegaGama = OmegaGamaPrime;
                      Cij = NewCij;
-                     y = NewY;
-                     OldAcceptedY = y;
+                     //y = NewY;
+                     //OldAcceptedY = y;
                      sumAcceptanceRewirig++;
                      TotalAcceptedRewiring++;
                      averageRbeforRewiring = averageRafterRewiring;
 		                 TotalSelfishRewiringAccepted++;
                      //std::cout<<"Accepted\n";
-                 }else y = OldAcceptedY;
+                 }//else y = OldAcceptedY;
               }else{ //NonSelfish check
                     std::cout<<"NonSelfish check\n";
                     if (averageRbeforRewiring < averageRafterRewiring){
@@ -120,8 +119,7 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
                        TotalAcceptedRewiring++;
                        y = NewY;
                        OldAcceptedY = y;
-                       }else
-                       y = OldAcceptedY;
+                     }//else y = OldAcceptedY;
               }
               if(i % 100 == 0){
                   AcceptanceRateRewiring.push_back(sumAcceptanceRewirig);
@@ -170,28 +168,14 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
 dim1 ODE::runDynamics(int _NumbertOfSteps, dim2 _Cij, dim1 _y, dim1 &MeanYPrime){
     dim1 r1, r2;
     double lastPushMeanYPrime;
-    //std::cout<<"-- in runDynamics "<<"_NumbertOfSteps = "<<_NumbertOfSteps<<"\n";
     for(int i=0; i<_NumbertOfSteps; i++){
         //std::cout<<"step = "<<i<<"\n";
         r1 = order_parameter(_y);
-        //r2 = order_parameter_k(_y);
-        //r1 = order_parameter(_y);
-        //r2 = order_parameter_k(_y);
         Order1.push_back(r1[0]);
         Psi1.push_back(r1[1]);
-        //Order2.push_back(r2[0]);
-        //Psi2.push_back(r2[1]);
-        //std::cout<<"Before\n";
-        //Print2D(_Cij);
-        //Print1D(_y);
         _y = runge_kutta4_integrator(_y, _Cij);
-        //std::cout<<"After\n";
-        //Print1D(_y);
         lastPushMeanYPrime = Mean(dydt(_y, _Cij), 0);
-        //std::cout<<"=== Mean Y Prime = "<<lastPushMeanYPrime<<"\n";
         MeanYPrime.push_back(lastPushMeanYPrime);
-        //std::cout<<"=== size of vector = "<<MeanYPrime.size()<<"\n";
-
     }
     return _y;
 }
@@ -207,12 +191,10 @@ dim2 ODE::rewiring(int indexFocusNode, dim1 nodesOrder, dim2 _Cij){
         _Cij[indexFocusNode][nodesOrder[j]] = 0;
         //_Cij[nodesOrder[j]][indexFocusNode] = 0;
         needZeroTobeOne = 1;
-        //std::cout<<nodesOrder[j]<<"->";
     }else{
            _Cij[indexFocusNode][nodesOrder[j]] = 1;
            //_Cij[nodesOrder[j]][indexFocusNode] = 1;
            needOneTobeZero = 1;
-           //std::cout<<nodesOrder[j]<<"->";
     }
 
     for(int i=j+1; i<N && (needZeroTobeOne || needOneTobeZero); i++){
@@ -221,12 +203,10 @@ dim2 ODE::rewiring(int indexFocusNode, dim1 nodesOrder, dim2 _Cij){
             _Cij[indexFocusNode][nodesOrder[i]] = 0;
             //_Cij[nodesOrder[i]][indexFocusNode] = 0;
             needOneTobeZero = 0;
-            //std::cout<<nodesOrder[i]<<"\n";
         }else if(_Cij[indexFocusNode][nodesOrder[i]]==0 && needZeroTobeOne){
                  _Cij[indexFocusNode][nodesOrder[i]] = 1;
                  //_Cij[nodesOrder[i]][indexFocusNode] = 1;
                  needZeroTobeOne = 0;
-                 //std::cout<<nodesOrder[i]<<"\n";
         }
       }
     }
@@ -282,6 +262,7 @@ dim1 ODE::dydt(const dim1 &x, dim2 CijLocal)
 /*------------------------------------------------------------*/
 dim2 ODE::reshape_2d(const std::vector<double>& X1D)
 {
+    //Print1D(X1D);
     using namespace std;
     dim2 X2D;
     X2D.resize(N);
@@ -302,6 +283,11 @@ void ODE::calDegree(){
     assert (Cij.size()==N && Cij[0].size()==N);
     for (int i = 0; i < N; i++)
         for (int j = 0; j < N; j++) {
+            if(Cij[i][j] > 1){
+                std::cout<< "Cij[i][j] > 1 !!!!!!!11 \n";
+                std::cout<<"i="<<i<<" j="<<j<<" Cij="<<Cij[i][j]<<"\n";
+                exit(EXIT_FAILURE);
+            }
             Degree[i] += Cij[i][j];
             if (Cij[i][j]>1e-8)
                 sum_degree ++;

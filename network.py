@@ -108,7 +108,8 @@ class make_graph:
     def random_k_out_graph(self, N, k, seed=123, plot_adj=False):
         self.N = N
         _alpha = 1
-        self.G = nx.random_k_out_graph(N, k, _alpha, seed=seed)
+        self.G = nx.random_k_out_graph(N, k, _alpha, self_loops=False, seed=seed)
+        #self.G = nx.random_uniform_k_out_graph(N, k, self_loops=False, with_replacement=True,seed=seed)
         M = nx.to_numpy_matrix(self.G)
         if plot_adj:
             self.imshow_plot(M, "con")

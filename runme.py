@@ -15,11 +15,35 @@ def make():
     print("Make...")
     os.system("make")
 
+def deleteParallelEdges(_adj_mat, NumberOfNodes):
+    for nodeNumber in range(NumberOfNodes):
+        index = np.where(_adj_mat[nodeNumber]>1)
+        index = np.concatenate(index).tolist()
+        #print('node=',nodeNumber, 'index=',index)
+        for element in index:
+            diff = int(_adj_mat[nodeNumber][element]-1)
+            _adj_mat[nodeNumber][element] = 1
+            rand_element_with_self = np.random.permutation(NumberOfNodes)
+            rand_element_without_self = np.delete(rand_element_with_self.tolist(), \
+                            np.where(rand_element_with_self == [nodeNumber]))
+            l = 0
+            while(diff>0):
+                if(_adj_mat[nodeNumber][rand_element_without_self[l]] == 0):
+                    _adj_mat[nodeNumber][rand_element_without_self[l]] = 1
+                    l = 0
+                    diff = diff-1
+                else:
+                    l = l+1
+    #print('np.where(_adj_mat>1))=',np.where(_adj_mat>1))
+    return _adj_mat
+
 def configGraph():
     #Adj = graph.barabasi(NumberOfNodes, m=2)
     #Adj = graph.erdos_renyi_graph(NumberOfNodes, 0.04)
-    Adj = graph.random_k_out_graph(NumberOfNodes, NumberOfEdges, seed=np.random.randint(100000))
-    adj_mat = np.asarray(Adj).reshape((NumberOfNodes, NumberOfNodes))
+    _Adj = graph.random_k_out_graph(NumberOfNodes, NumberOfEdges, seed=np.random.randint(100000))
+    adj_mat_with_parallel_edges = np.asarray(_Adj).reshape((NumberOfNodes, NumberOfNodes))
+    adj_mat = deleteParallelEdges(adj_mat_with_parallel_edges, NumberOfNodes)
+    Adj = adj_mat.reshape(-1)
     InitialSumKin = np.array([sum(adj_mat.T[i]) for i in range(NumberOfNodes)])
     #degree = np.sum(adj_mat, axis=1)
     Omega = np.random.uniform(-1, 1, size=NumberOfNodes).tolist()
@@ -34,8 +58,8 @@ def configParameters():
     NumberOfNodes = 100
     NumberOfEdges = 6
     couplingStrength = 0.27
-    NumberOfIterations = 75000
-    NumbertOfSteps = 1000
+    NumberOfIterations = 70000
+    NumbertOfSteps = 800
     NumberOfSelfishNodes = NumberOfNodes
     tfinal = 100.0
     tinitial = 0.0
@@ -82,7 +106,7 @@ def getParametersFromC():
 # ===================================== --------- ========================
 
 make()
-NumberOfNodes, NumberOfEdges, couplingStrength, \
+NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, \
 NumberOfIterations, NumbertOfSteps, tfinal, tinitial, \
 dt, times, graph, numberOfBins = configParameters()
 
