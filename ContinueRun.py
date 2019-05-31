@@ -7,6 +7,7 @@ from network import make_graph
 from modules import *
 from numpy import pi
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # ===================================== functions ========================
 def make():
@@ -34,7 +35,7 @@ def configParameters():
     NumberOfNodes = 100
     NumberOfEdges = 6
     couplingStrength = 0.27
-    NumberOfIterations = 75000
+    NumberOfIterations = 50000
     NumbertOfSteps = 1000
     NumberOfSelfishNodes = NumberOfNodes
     tfinal = 100.0
@@ -43,7 +44,7 @@ def configParameters():
     times = np.arange(0,tfinal, dt)
     graph  = make_graph()
     numberOfBins = 20
-    return (NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
+    return (NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
             NumbertOfSteps, tfinal, tinitial, dt, times, graph, numberOfBins)
 
 def createDir(runNumber, motherDirPath):
@@ -79,21 +80,32 @@ def getParametersFromC():
     return (MeanRinEachIteration, acceptanceRateRewiring, finalAdj,
             finalY, final_adj_mat, sumKin, sumKin_bin_means, sliceOfOmega)
 
+def importConfigGraph(DirInitData):
+    fileName_adj = 'FinalAdj.txt'
+    Adj = np.loadtxt(DirInitData+'/'+fileName_adj).reshape(-1,NumberOfNodes*NumberOfNodes).ravel().tolist()
+    adj_mat = np.asarray(Adj).reshape((NumberOfNodes, NumberOfNodes))
+    fileName_omega = 'Omega.txt'
+    Omega = pd.read_csv(DirInitData+'/'+fileName_omega, header=None).stack().tolist()
+    fileName_Y = 'Y0.txt'
+    InitialCondition = pd.read_csv(DirInitData+'/'+fileName_Y, header=None).stack().tolist()
+    return (Adj, adj_mat, Omega, InitialCondition)
+
+
 # ===================================== --------- ========================
 
 make()
-NumberOfNodes, NumberOfEdges, couplingStrength, \
-NumberOfIterations, NumbertOfSteps, tfinal, tinitial, \
-dt, times, graph, numberOfBins = configParameters()
+NumberOfSelfishNodes ,NumberOfNodes, NumberOfEdges,\
+couplingStrength, NumberOfIterations, NumbertOfSteps, \
+tfinal, tinitial, dt, times, graph, numberOfBins = configParameters()
 
-Adj, adj_mat, InitialSumKin, \
-Omega, InitialCondition = configGraph()
+DirInitData = "/home/vahid/Documents/Complex network/c/CompleteData/initData"
+Adj, adj_mat, Omega, InitialCondition = importConfigGraph(DirInitData)
 
 currentTime = datetime.datetime.now()
 hour = currentTime.hour;
 start = time()
 #motherDirPath = "/storage/users/fbaharifard/ComplexNetworks/CompleteData"
-motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData"
+motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData/continueData"
 runNumber = 0
 while(runNumber < 1): #hour < 14):
     currentPath = createDir(runNumber, motherDirPath)
@@ -104,8 +116,8 @@ while(runNumber < 1): #hour < 14):
         'NumbertOfSteps.txt':NumbertOfSteps,
         'InitAdj.txt':adj_mat,
         'Omega.txt':np.array(Omega).T,
-        'Y0.txt':np.array(InitialCondition).T,
-        'InitialSumKin.txt':np.array(InitialSumKin).T
+        'Y0.txt':np.array(InitialCondition).T
+        #'InitialSumKin.txt':np.array(InitialSumKin).T
     }
     saveData(initialList)
     print("start simulation...")
@@ -144,5 +156,5 @@ while(runNumber < 1): #hour < 14):
     hour = currentTime.hour;
     runNumber += 1
 
-if (motherDirPath == "/home/vahid/Documents/Complex network/c/CompleteData"):
+if (motherDirPath == "/home/vahid/Documents/Complex network/c/CompleteData/continueData"):
     os.system("mpg123 "+" finish.mp3")
