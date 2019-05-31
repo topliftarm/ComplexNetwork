@@ -43,7 +43,7 @@ def configParameters():
     times = np.arange(0,tfinal, dt)
     graph  = make_graph()
     numberOfBins = 20
-    return (NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
+    return (NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
             NumbertOfSteps, tfinal, tinitial, dt, times, graph, numberOfBins)
 
 def createDir(runNumber, motherDirPath):
