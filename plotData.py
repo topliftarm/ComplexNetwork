@@ -2,12 +2,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-# fileName1 = 'r_glob.txt'
+fileName1 = 'r_glob.txt'
 # #DirPath = "/home/fatemeh/Documents/ComplexNetwork/CompleteData/Run0"
-# DirPath1 = "/home/vahid/Documents/Complex network/c/CompleteData/Run0"
-# data1 = pd.read_csv(DirPath1+'/'+fileName1, header=None)
-# plt.figure()
-# plt.plot(data1)
+DirPath1 = "/home/vahid/Documents/Complex network/c/CompleteData/Run0"
+data1 = pd.read_csv(DirPath1+'/'+fileName1, header=None)
+plt.figure()
+plt.plot(data1)
 
 # fileName1 = 'r_glob.txt'
 # DirPath = "/home/vahid/Documents/Complex network/c/CompleteData/Run0"
