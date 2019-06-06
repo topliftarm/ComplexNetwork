@@ -37,17 +37,44 @@ def deleteParallelEdges(_adj_mat, NumberOfNodes):
     #print('np.where(_adj_mat>1))=',np.where(_adj_mat>1))
     return _adj_mat
 
+def deleteBiEdges(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfEdges):
+    for i in range(NumberOfNodes):
+        for j in range(i+1,NumberOfNodes):
+            if (adj_mat_with_Bi_edges[i][j]):
+                if(adj_mat_with_Bi_edges[i][j]==adj_mat_with_Bi_edges[j][i]):
+                    adj_mat_with_Bi_edges[j][i] = 0
+    return adj_mat_with_Bi_edges
+
+def FixDegree(adj_mat_LowDegree, NumberOfNodes, NumberOfEdges):
+    listNodes = list()
+    for i in range(NumberOfNodes):
+        if (sum(adj_mat_LowDegree[i])<NumberOfEdges):
+            [listNodes.append(i) for _i in range(int(NumberOfEdges-sum(adj_mat_LowDegree[i])))]
+
+    for i in listNodes:
+        index = np.where(adj_mat_LowDegree[i]<1)
+        index = np.concatenate(index).tolist()
+        if i in index: index.remove(i)
+        for ii in index:
+            if(adj_mat_LowDegree[ii][i]):index.remove(ii)
+        index = np.random.permutation(index)
+        adj_mat_LowDegree[i][index[0]] = 1
+
+    return adj_mat_LowDegree
+
 def configGraph():
     #Adj = graph.barabasi(NumberOfNodes, m=2)
     #Adj = graph.erdos_renyi_graph(NumberOfNodes, 0.04)
     _Adj = graph.random_k_out_graph(NumberOfNodes, NumberOfEdges, seed=np.random.randint(100000))
     adj_mat_with_parallel_edges = np.asarray(_Adj).reshape((NumberOfNodes, NumberOfNodes))
-    adj_mat = deleteParallelEdges(adj_mat_with_parallel_edges, NumberOfNodes)
+    adj_mat_with_Bi_edges = deleteParallelEdges(adj_mat_with_parallel_edges, NumberOfNodes)
+    adj_mat_LowDegree = deleteBiEdges(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfEdges)
+    adj_mat = FixDegree(adj_mat_LowDegree, NumberOfNodes, NumberOfEdges)
     Adj = adj_mat.reshape(-1)
     InitialSumKin = np.array([sum(adj_mat.T[i]) for i in range(NumberOfNodes)])
     #degree = np.sum(adj_mat, axis=1)
     Omega = np.random.uniform(-1, 1, size=NumberOfNodes).tolist()
-    InitialCondition = np.random.normal(0, 2*pi, NumberOfNodes).tolist()
+    InitialCondition = np.random.normal(0, pi/2, NumberOfNodes).tolist()
 
     return Adj, adj_mat, InitialSumKin, Omega, InitialCondition;
 
@@ -57,10 +84,10 @@ def configParameters():
     np.random.seed(seed)
     NumberOfNodes = 100
     NumberOfEdges = 6
-    couplingStrength = 0.27
-    NumberOfIterations = 70000
-    NumbertOfSteps = 800
-    NumberOfSelfishNodes = NumberOfNodes
+    couplingStrength = 0.23
+    NumberOfIterations = 20000
+    NumbertOfSteps = 200
+    NumberOfSelfishNodes = 0 # NumberOfNodes
     tfinal = 100.0
     tinitial = 0.0
     dt = 0.1
@@ -88,7 +115,7 @@ def saveData(saveList):
     print("saving data ... done")
 
 def getParametersFromC():
-    #r_glob, psi = obj.get_order_parameters()
+    r_glob, psi = obj.get_order_parameters()
     MeanRinEachIteration = obj.getMeanRinEachIteration()
     acceptanceRateRewiring = obj.getAcceptanceRewiring()
     #MeanYPrime = obj.getMeanYPrime();
@@ -100,7 +127,7 @@ def getParametersFromC():
     digitized = np.digitize(Omega, _bins)
     sumKin_bin_means = [sumKin[digitized == i].mean() for i in range(1, len(_bins)+1)]
     sliceOfOmega = _bins
-    return (MeanRinEachIteration, acceptanceRateRewiring, finalAdj,
+    return (r_glob, MeanRinEachIteration, acceptanceRateRewiring, finalAdj,
             finalY, final_adj_mat, sumKin, sumKin_bin_means, sliceOfOmega)
 
 # ===================================== --------- ========================
@@ -147,7 +174,7 @@ while(runNumber < 1): #hour < 14):
         sol = obj.integrate(Adj, rewire=True, selfish=False, NumberOfSelfishNodes=2)
     '''
     sol = np.asarray(sol)
-    MeanRinEachIteration, acceptanceRateRewiring, \
+    r_glob, MeanRinEachIteration, acceptanceRateRewiring, \
     finalAdj,finalY, final_adj_mat, sumKin, sumKin_bin_means, \
     sliceOfOmega = getParametersFromC()
     print("simulation...done")
@@ -157,7 +184,7 @@ while(runNumber < 1): #hour < 14):
         'acceptanceRateRewiring.txt':np.array(acceptanceRateRewiring).T,
         'MeanRinEachIteration.txt':np.array(MeanRinEachIteration).T,
         'finalY.txt':np.array(finalY).T,
-        #'r_glob.txt':np.array(r_glob).T,
+        'r_glob.txt':np.array(r_glob).T,
         'sumKin.txt':np.array(sumKin).T,
         'sumKin_bin_means.txt':np.array(sumKin_bin_means).T,
         'sliceOfOmega.txt':np.array(sliceOfOmega).T
