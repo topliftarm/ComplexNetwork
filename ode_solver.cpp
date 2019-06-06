@@ -59,6 +59,7 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
     if(!rewire){
 	      y = IC;
         for(int i=0; i<NumberOfIterations; i++){
+             std::cout<<"without Rewiring - Iteration = "<<i<<"\n";
  	           y = runDynamics(NumbertOfSteps, Cij, y, MeanYPrimeAccepted);
              averageRafterRewiring = Mean(Order1,ceil(NumbertOfSteps/2));
              MeanRinEachIteration.push_back(averageRafterRewiring);
@@ -68,7 +69,7 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
           TotalAcceptedRewiring = 0;
 	        int TotalSelfishRewiringAccepted = 0;
 	        TotalRewiring = 0;
-          MeanYPrimeAccepted.clear();
+          //MeanYPrimeAccepted.clear();
           y = runDynamics(NumbertOfSteps, Cij, IC, MeanYPrimeAccepted);
 	        OmegaGama = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
           //OldAcceptedY = y;
@@ -82,22 +83,22 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
 	        //logfile<<std::cout<<" Selfish Nodes : \n";
 	        Print1D(selfishNodes);
           for(int i=0; i<NumberOfIterations; i++){
-              std::cout<<" -- Iteration = "<<i<<"\n";
+              std::cout<<"with Rewiring - Iteration = "<<i<<"\n";
               //logfile<<" -- Iteration = "<<i<<"\n";
               std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
               randomNode = CopyOfNodesOrder[0];
-              Order1.clear();
-              Psi1.clear();
+              //Order1.clear();
+              //Psi1.clear();
               NewCij = rewiring(randomNode, nodesOrder, Cij);
               TotalRewiring++;
-              MeanYPrimeAccepted.clear();
+              //MeanYPrimeAccepted.clear();
               //NewY = runDynamics(NumbertOfSteps, NewCij, y, MeanYPrimeAccepted);
               NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrimeAccepted);
               OmegaGamaPrime = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
               averageRafterRewiring = Mean(Order1,ceil(NumbertOfSteps/2));
               MeanRinEachIteration.push_back(averageRafterRewiring);
               if(std::find(selfishNodes.begin(), selfishNodes.end(), randomNode)!= selfishNodes.end()){//Selfish check
-                 std::cout<<"Selfish check *** \n";
+                 //std::cout<<"Selfish check *** \n";
                  if(abs(Omega[randomNode]-OmegaGamaPrime)<abs(Omega[randomNode]-OmegaGama)){
                      OmegaGama = OmegaGamaPrime;
                      Cij = NewCij;
@@ -182,34 +183,38 @@ dim1 ODE::runDynamics(int _NumbertOfSteps, dim2 _Cij, dim1 _y, dim1 &MeanYPrime)
 /*------------------------------------------------------------*/
 dim2 ODE::rewiring(int indexFocusNode, dim1 nodesOrder, dim2 _Cij){
     std::random_shuffle(nodesOrder.begin(), nodesOrder.end());
-    bool needZeroTobeOne, needOneTobeZero;
-    needOneTobeZero = 0;
-    needZeroTobeOne = 0;
-    int j = 0;
-    if(indexFocusNode == nodesOrder[j]) j = 1;
-    if(_Cij[indexFocusNode][nodesOrder[j]]==1){
-        _Cij[indexFocusNode][nodesOrder[j]] = 0;
-        //_Cij[nodesOrder[j]][indexFocusNode] = 0;
-        needZeroTobeOne = 1;
-    }else{
-           _Cij[indexFocusNode][nodesOrder[j]] = 1;
-           //_Cij[nodesOrder[j]][indexFocusNode] = 1;
-           needOneTobeZero = 1;
-    }
-
-    for(int i=j+1; i<N && (needZeroTobeOne || needOneTobeZero); i++){
-      if(nodesOrder[i] != indexFocusNode){
-        if(_Cij[indexFocusNode][nodesOrder[i]]==1 && needOneTobeZero){
-            _Cij[indexFocusNode][nodesOrder[i]] = 0;
-            //_Cij[nodesOrder[i]][indexFocusNode] = 0;
-            needOneTobeZero = 0;
-        }else if(_Cij[indexFocusNode][nodesOrder[i]]==0 && needZeroTobeOne){
-                 _Cij[indexFocusNode][nodesOrder[i]] = 1;
-                 //_Cij[nodesOrder[i]][indexFocusNode] = 1;
-                 needZeroTobeOne = 0;
+    int RemovedNodeIndex, InsertNodeIndex;
+    int j;
+    // ----------- Remove One Random Edge ----
+    j = 0;
+    int exit = 0;
+    while(!exit){
+      if(_Cij[indexFocusNode][nodesOrder[j]]==1 &&
+        (indexFocusNode != nodesOrder[j]) ){
+          _Cij[indexFocusNode][nodesOrder[j]] = 0;
+          RemovedNodeIndex = nodesOrder[j];
+          exit = 1;
         }
-      }
+        j++;
     }
+    //----------------------------------------
+
+    //------------ Insert One Random Edge ----
+    j = 0;
+    exit = 0;
+    while(!exit){
+      if(_Cij[indexFocusNode][nodesOrder[j]]==0 &&
+        (indexFocusNode != nodesOrder[j]) &&
+        (RemovedNodeIndex != nodesOrder[j]) &&
+        (_Cij[nodesOrder[j]][indexFocusNode]==0) ){
+          _Cij[indexFocusNode][nodesOrder[j]] = 1;
+          InsertNodeIndex = nodesOrder[j];
+          exit = 1;
+        }
+        j++;
+    }
+    //----------------------------------------
+    //std::cout<<"Removed="<<RemovedNodeIndex<<" Insert="<<InsertNodeIndex<<"\n";
     return _Cij;
 }
 /*------------------------------------------------------------*/
