@@ -83,16 +83,16 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
 	        std::cout<<" Number Of Selfish Nodes = "<<NumberOfSelfishNodes<<"\n";
           std::cout<<" Selfish Nodes : \n";
 	        Print1D(selfishNodes);
-          std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
-          int index=0;
+          // std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
+          // int index=0;
           for(int i=0; i<NumberOfIterations; i++){
               std::cout<<"========================================\n";
               std::cout<<"with Rewiring - Iteration = "<<i<<"\n";
-              //std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
-              //randomNode = CopyOfNodesOrder[0];
-              if(index>N-1) {index=0;std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());}
-              randomNode = CopyOfNodesOrder[index];
-              index++;
+              std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
+              randomNode = CopyOfNodesOrder[0];
+              // if(index>N-1) {index=0;std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());}
+              // randomNode = CopyOfNodesOrder[index];
+              // index++;
               NewCij = rewiring(randomNode, nodesOrder, Cij);
               TotalRewiring++;
               //MeanYPrimeAccepted.clear();

@@ -80,12 +80,12 @@ def configGraph():
 
 def configParameters():
     print("configuration...\n")
-    #seed = 12358
-    #np.random.seed(seed)
+    seed = 15378
+    np.random.seed(seed)
     NumberOfNodes = 100
     NumberOfEdges = 6
     couplingStrength = 0.27
-    NumberOfIterations = 700
+    NumberOfIterations = 10000
     NumbertOfSteps = 1000
     rewire = True
     NumberOfSelfishNodes = NumberOfNodes
