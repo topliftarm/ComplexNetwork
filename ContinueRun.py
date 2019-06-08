@@ -32,19 +32,20 @@ def configParameters():
     print("configuration...\n")
     seed = 12358
     np.random.seed(seed)
-    NumberOfNodes = 100
+    NumberOfNodes = 5
     NumberOfEdges = 6
-    couplingStrength = 0.23
-    NumberOfIterations = 20000
-    NumbertOfSteps = 200
-    NumberOfSelfishNodes = 0 #NumberOfNodes
+    couplingStrength = 0.27
+    NumberOfIterations = 4
+    NumbertOfSteps = 70
+    rewire = False
+    NumberOfSelfishNodes = NumberOfNodes
     tfinal = 100.0
     tinitial = 0.0
     dt = 0.1
     times = np.arange(0,tfinal, dt)
     graph  = make_graph()
     numberOfBins = 20
-    return (NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
+    return (rewire, NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
             NumbertOfSteps, tfinal, tinitial, dt, times, graph, numberOfBins)
 
 def createDir(runNumber, motherDirPath):
@@ -72,13 +73,15 @@ def getParametersFromC():
     finalAdj = obj.getCij()
     finalY = obj.getFinalY()
     final_adj_mat = np.asarray(finalAdj).reshape((NumberOfNodes, NumberOfNodes))
-    sumKin = np.array([sum(final_adj_mat.T[i]) for i in range(NumberOfNodes)])
-    _sumOfHist, _bins = np.histogram(Omega, bins=numberOfBins)
-    digitized = np.digitize(Omega, _bins)
-    sumKin_bin_means = [sumKin[digitized == i].mean() for i in range(1, len(_bins)+1)]
-    sliceOfOmega = _bins
+    # sumKin = np.array([sum(final_adj_mat.T[i]) for i in range(NumberOfNodes)])
+    # _sumOfHist, _bins = np.histogram(Omega, bins=numberOfBins)
+    # digitized = np.digitize(Omega, _bins)
+    # sumKin_bin_means = [sumKin[digitized == i].mean() for i in range(1, len(_bins)+1)]
+    # sliceOfOmega = _bins
+    # return (r_glob, MeanRinEachIteration, acceptanceRateRewiring, finalAdj,
+    #         finalY, final_adj_mat, sumKin, sumKin_bin_means, sliceOfOmega)
     return (r_glob, MeanRinEachIteration, acceptanceRateRewiring, finalAdj,
-            finalY, final_adj_mat, sumKin, sumKin_bin_means, sliceOfOmega)
+            finalY, final_adj_mat)
 
 def importConfigGraph(DirInitData):
     fileName_adj = 'FinalAdj.txt'
@@ -86,10 +89,10 @@ def importConfigGraph(DirInitData):
     adj_mat = np.asarray(Adj).reshape((NumberOfNodes, NumberOfNodes))
     fileName_omega = 'Omega.txt'
     Omega = pd.read_csv(DirInitData+'/'+fileName_omega, header=None).stack().tolist()
-    # fileName_Y0 = 'Y0.txt'
-    # InitialCondition = pd.read_csv(DirInitData+'/'+fileName_Y0, header=None).stack().tolist()
-    fileName_Y = 'finalY.txt'
-    InitialCondition = pd.read_csv(DirInitData+'/'+fileName_Y, header=None).stack().tolist()
+    fileName_Y0 = 'Y0.txt'
+    InitialCondition = pd.read_csv(DirInitData+'/'+fileName_Y0, header=None).stack().tolist()
+    # fileName_Y = 'finalY.txt'
+    # InitialCondition = pd.read_csv(DirInitData+'/'+fileName_Y, header=None).stack().tolist()
 
     return (Adj, adj_mat, Omega, InitialCondition)
 
@@ -97,7 +100,7 @@ def importConfigGraph(DirInitData):
 # ===================================== --------- ========================
 
 make()
-NumberOfSelfishNodes ,NumberOfNodes, NumberOfEdges,\
+rewire, NumberOfSelfishNodes ,NumberOfNodes, NumberOfEdges,\
 couplingStrength, NumberOfIterations, NumbertOfSteps, \
 tfinal, tinitial, dt, times, graph, numberOfBins = configParameters()
 
@@ -126,7 +129,7 @@ while(runNumber < 1): #hour < 14):
     print("start simulation...")
     obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
                    InitialCondition, Omega, NumbertOfSteps, NumberOfIterations)
-    sol = obj.integrate(Adj, rewire=True, selfish=False, NumberOfSelfishNodes=NumberOfSelfishNodes)
+    sol = obj.integrate(Adj, rewire=rewire, selfish=False, NumberOfSelfishNodes=NumberOfSelfishNodes)
     '''
     if (runNumber == 1):
         obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
@@ -138,9 +141,12 @@ while(runNumber < 1): #hour < 14):
         sol = obj.integrate(Adj, rewire=True, selfish=False, NumberOfSelfishNodes=2)
     '''
     sol = np.asarray(sol)
+    # r_glob, MeanRinEachIteration, acceptanceRateRewiring, \
+    # finalAdj,finalY, final_adj_mat, sumKin, sumKin_bin_means, \
+    # sliceOfOmega = getParametersFromC()
     r_glob, MeanRinEachIteration, acceptanceRateRewiring, \
-    finalAdj,finalY, final_adj_mat, sumKin, sumKin_bin_means, \
-    sliceOfOmega = getParametersFromC()
+    finalAdj,finalY, final_adj_mat = getParametersFromC()
+
     print("simulation...done")
     del obj, sol
     finalList = {
@@ -148,10 +154,10 @@ while(runNumber < 1): #hour < 14):
         'acceptanceRateRewiring.txt':np.array(acceptanceRateRewiring).T,
         'MeanRinEachIteration.txt':np.array(MeanRinEachIteration).T,
         'finalY.txt':np.array(finalY).T,
-        'r_glob.txt':np.array(r_glob).T,
-        'sumKin.txt':np.array(sumKin).T,
-        'sumKin_bin_means.txt':np.array(sumKin_bin_means).T,
-        'sliceOfOmega.txt':np.array(sliceOfOmega).T
+        'r_glob.txt':np.array(r_glob).T
+        # 'sumKin.txt':np.array(sumKin).T,
+        # 'sumKin_bin_means.txt':np.array(sumKin_bin_means).T,
+        # 'sliceOfOmega.txt':np.array(sliceOfOmega).T
     }
     saveData(finalList)
     display_time(time()-start)

@@ -80,21 +80,22 @@ def configGraph():
 
 def configParameters():
     print("configuration...\n")
-    seed = 12358
-    np.random.seed(seed)
+    #seed = 12358
+    #np.random.seed(seed)
     NumberOfNodes = 100
     NumberOfEdges = 6
-    couplingStrength = 0.23
-    NumberOfIterations = 1000
-    NumbertOfSteps = 200
+    couplingStrength = 0.27
+    NumberOfIterations = 700
+    NumbertOfSteps = 1000
+    rewire = True
     NumberOfSelfishNodes = NumberOfNodes
     tfinal = 100.0
     tinitial = 0.0
     dt = 0.1
     times = np.arange(0,tfinal, dt)
     graph  = make_graph()
-    numberOfBins = 20
-    return (NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
+    numberOfBins = 2
+    return (rewire, NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
             NumbertOfSteps, tfinal, tinitial, dt, times, graph, numberOfBins)
 
 def createDir(runNumber, motherDirPath):
@@ -132,8 +133,8 @@ def getParametersFromC():
 
 # ===================================== --------- ========================
 
-make()
-NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, \
+#make()
+rewire, NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, \
 NumberOfIterations, NumbertOfSteps, tfinal, tinitial, \
 dt, times, graph, numberOfBins = configParameters()
 
@@ -162,7 +163,7 @@ while(runNumber < 1): #hour < 14):
     print("start simulation...")
     obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
                    InitialCondition, Omega, NumbertOfSteps, NumberOfIterations)
-    sol = obj.integrate(Adj, rewire=True, selfish=False, NumberOfSelfishNodes=NumberOfSelfishNodes)
+    sol = obj.integrate(Adj, rewire=rewire, selfish=False, NumberOfSelfishNodes=NumberOfSelfishNodes)
     '''
     if (runNumber == 1):
         obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \

@@ -80,14 +80,14 @@ plt.plot(data1, '-r')
 
 #---------------------------------------------------
 
-fileName1 = 'sumKin_bin_means.txt'
-fileName2 = 'sliceOfOmega.txt'
-#DirPath = "/home/fatemeh/Documents/ComplexNetwork/CompleteData/Run1"
-DirPath1 = "/home/vahid/Documents/Complex network/c/CompleteData/Run0"
-data1_mean_degree = pd.read_csv(DirPath1+'/'+fileName1, header=None)
-data_omega = pd.read_csv(DirPath1+'/'+fileName2, header=None)
-plt.figure()
-plt.plot(data_omega, data1_mean_degree, 'r*')
+# fileName1 = 'sumKin_bin_means.txt'
+# fileName2 = 'sliceOfOmega.txt'
+# #DirPath = "/home/fatemeh/Documents/ComplexNetwork/CompleteData/Run1"
+# DirPath1 = "/home/vahid/Documents/Complex network/c/CompleteData/Run0"
+# data1_mean_degree = pd.read_csv(DirPath1+'/'+fileName1, header=None)
+# data_omega = pd.read_csv(DirPath1+'/'+fileName2, header=None)
+# plt.figure()
+# plt.plot(data_omega, data1_mean_degree, 'r*')
 
 #---------------------------------------------------
 
