@@ -3,6 +3,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <fstream>
+#include <string>
 #include <iostream>
 #include "ode_solver.h"
 #include "math.h"
@@ -12,7 +13,7 @@
 #include <vector>
 #define M_PI 3.14159265358979323846
 
-//using namespace std;
+using namespace std;
 
 double ODE::Mean(const dim1& vector, int lastChunk=0){
     double mean;
@@ -37,7 +38,19 @@ dim1 ODE::createSelfishList(int NumberOfSelfishNodes, dim1 NodesOrder){
    return selfidhNodes;
 }
 /*------------------------------------------------------------*/
-void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int NumberOfSelfishNodes=0)
+void ODE::saveMatrix(string fileName, dim2 data){
+  ofstream newFile;
+	newFile.open(fileName);
+	for(int i=0; i<N; i++){
+    for(int j=0; j<N; j++)
+	     newFile << data[i][j] << ' ';
+    newFile<<"\n";
+	}
+	newFile.close();
+}
+
+/*------------------------------------------------------------*/
+void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int NumberOfSelfishNodes=0)
 {
     //freopen("output.txt","w",stdout);
     //ofstream logfile;
@@ -71,6 +84,7 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
     else {
           TotalAcceptedRewiring = 0;
 	        int TotalSelfishRewiringAccepted = 0;
+          int TotalNonSelfishRewiringAccepted = 0;
 	        TotalRewiring = 0;
           //MeanYPrimeAccepted.clear();
           y = runDynamics(NumbertOfSteps, Cij, IC, MeanYPrimeAccepted);
@@ -83,16 +97,17 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
 	        std::cout<<" Number Of Selfish Nodes = "<<NumberOfSelfishNodes<<"\n";
           std::cout<<" Selfish Nodes : \n";
 	        Print1D(selfishNodes);
-          // std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
-          // int index=0;
+          std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
+          int index=0;
           for(int i=0; i<NumberOfIterations; i++){
               std::cout<<"========================================\n";
               std::cout<<"with Rewiring - Iteration = "<<i<<"\n";
-              std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
-              randomNode = CopyOfNodesOrder[0];
-              // if(index>N-1) {index=0;std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());}
-              // randomNode = CopyOfNodesOrder[index];
-              // index++;
+              saveMatrix(currentPath+"/"+"Adj"+to_string(i)+".txt", Cij);
+              // std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
+              // randomNode = CopyOfNodesOrder[0];
+              if(index>N-1) {index=0;std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());}
+              randomNode = CopyOfNodesOrder[index];
+              index++;
               NewCij = rewiring(randomNode, nodesOrder, Cij);
               TotalRewiring++;
               //MeanYPrimeAccepted.clear();
@@ -101,8 +116,8 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
               OmegaGamaPrime = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
               averageRafterRewiring = Mean(Order1,ceil(NumbertOfSteps/2));
               MeanRinEachIteration.push_back(averageRafterRewiring);
-              auto min = std::min_element(Order1.end()-ceil(NumbertOfSteps/2), Order1.end());
-              auto max = std::max_element(Order1.end()-ceil(NumbertOfSteps/2), Order1.end());
+              //auto min = std::min_element(Order1.end()-ceil(NumbertOfSteps/2), Order1.end());
+              //auto max = std::max_element(Order1.end()-ceil(NumbertOfSteps/2), Order1.end());
               //std::cout<<"min="<<*min<<" max="<<*max<<"\n";
               //if((*max-*min)<0.1){
               if(1){
@@ -110,6 +125,10 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
                      std::cout<<"Selfish check *** \n";
                      //std::cout<<"randomNode="<<randomNode<<" Omega[randomNode]="<<Omega[randomNode]<<"\n";
                      //std::cout<<"OmegaGamaPrime(NOW)="<<OmegaGamaPrime<<" OmegaGama(BEFORE)="<<OmegaGama<<"\n";
+
+                     //OmegaGamaPrime = round(OmegaGamaPrime*1000)/1000.0;
+                     //OmegaGama = round(OmegaGama*1000)/1000.0;
+
                      if(abs(Omega[randomNode]-OmegaGamaPrime)<abs(Omega[randomNode]-OmegaGama)){
                          OmegaGama = OmegaGamaPrime;
                          Cij = NewCij;
@@ -131,6 +150,7 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
                            TotalAcceptedRewiring++;
                            y = NewY;
                            OldAcceptedY = y;
+                           TotalNonSelfishRewiringAccepted++;
                          }//else y = OldAcceptedY;
                   }
               } else std::cout<<"Not Reached to Stationary State !!!!!!!!!!!!!!!!!!!!! \n";
@@ -140,6 +160,7 @@ void ODE::integrate(const dim1& iAdj, bool rewire=false, bool selfish=false, int
                   sumAcceptanceRewirig = 0;
               }
               std::cout<<"TotalSelfishRewiringAccepted = "<<TotalSelfishRewiringAccepted<<"\n";
+              std::cout<<"TotalNonSelfishRewiringAccepted = "<<TotalNonSelfishRewiringAccepted<<"\n";
           }//end !selfish
       }
       FinalY = y;

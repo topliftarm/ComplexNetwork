@@ -1,4 +1,5 @@
 /* File : example.h */
+#include <string>
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -6,6 +7,7 @@
 typedef std::vector<double> dim1;
 typedef std::vector<std::vector<double> > dim2;
 
+using namespace std;
 
 
 class ODE {
@@ -60,7 +62,7 @@ public:
   dim1 runDynamics(int, dim2, dim1, dim1&);
 
   dim1 MeanRinEachIteration;
-  void integrate(const dim1& iAdj, bool rewire, bool selfish, int NumberOfSelfishNodes);
+  void integrate(const dim1& iAdj, bool rewire, string currentPath, int NumberOfSelfishNodes);
   dim1 dydt(const dim1 &x, dim2 CijLocal);
   dim1 order_parameter(const dim1& x);
   dim1 order_parameter_k(const dim1 &x);
@@ -70,6 +72,7 @@ public:
   void calDegree();
   void set_matrices(const dim1& iAdj);
   dim1 getCij();
+  void saveMatrix(string fileName, dim2 data);
 
   dim1 IC;
 };
