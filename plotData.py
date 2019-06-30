@@ -1,13 +1,89 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import os
+import sys
 
-fileName1 = 'r_glob.txt'
-# #DirPath = "/home/fatemeh/Documents/ComplexNetwork/CompleteData/Run0"
-DirPath1 = "/home/vahid/Documents/Complex network/c/CompleteData/Run0"
-data1 = pd.read_csv(DirPath1+'/'+fileName1, header=None)
-plt.figure()
-plt.plot(data1)
+mpl.rcParams['agg.path.chunksize'] = 10000
+
+# ========================================================
+def plot_rglob():
+    Name = 'r_glob'
+    fileName1 = Name + '.txt'
+    #DirPath1 = "/home/vahid/Documents/Complex network/c/CompleteData/Run50"
+    DirPath1 = dirPath+'/'+dirName
+    data1 = pd.read_csv(DirPath1+'/'+fileName1, header=None)
+    plt.figure(figsize=(15, 15), dpi=120)
+    plt.plot(data1)
+    plt.title(Name)
+    print(DirPath1+'/'+Name+'.png')
+    plt.savefig(DirPath1+'/'+Name+'.png')
+    # plt.show()
+
+# --------------------------------------------------------
+def plot_MeanRinEachIteration():
+    Name = 'MeanRinEachIteration'
+    fileName1 = Name + '.txt'
+    DirPath1 = dirPath+'/'+dirName
+    data1 = pd.read_csv(DirPath1+'/'+fileName1, header=None)
+    plt.figure(figsize=(15, 15), dpi=120)
+    plt.plot(data1, '-r')
+    plt.title(Name)
+    plt.savefig(DirPath1+'/'+Name+'.png')
+    #plt.show()
+
+# --------------------------------------------------------
+def plot_acceptanceRateRewiring():
+    Name = 'acceptanceRateRewiring'
+    fileName1 = Name + '.txt'
+    DirPath1 = dirPath+'/'+dirName
+    data1 = pd.read_csv(DirPath1+'/'+fileName1, header=None)
+    plt.figure(figsize=(15, 15), dpi=120)
+    plt.plot(data1, '-r')
+    plt.title(Name)
+    plt.savefig(DirPath1+'/'+Name+'.png')
+    #plt.show()
+
+# --------------------------------------------------------
+def plot_sumKinBinMeans():
+    Name = 'sumKin_bin_means'
+    fileName1 = Name + '.txt'
+    fileName2 = 'sliceOfOmega.txt'
+    DirPath1 = dirPath+'/'+dirName
+    data1_mean_degree = pd.read_csv(DirPath1+'/'+fileName1, header=None)
+    data_omega = pd.read_csv(DirPath1+'/'+fileName2, header=None)
+    plt.figure(figsize=(15, 15), dpi=120)
+    plt.plot(data_omega, data1_mean_degree, 'r*')
+    plt.title(Name)
+    plt.savefig(DirPath1+'/'+Name+'.png')
+    #plt.show()
+
+# ========================================================
+dirName = sys.argv[1]
+
+if (len(sys.argv) == 1):
+    print("Please Insert Dir. Name")
+    sys.exit(1)
+elif (len(sys.argv)==2):
+    print("argv==2")
+    dirPath = "/home/vahid/Documents/Complex network/c/CompleteData"
+elif (len(sys.argv)==3):
+    print("argv==3")
+    dirPath = sys.argv[2]
+
+print(dirPath+'/'+dirName)
+plot_rglob()
+plot_MeanRinEachIteration()
+plot_acceptanceRateRewiring()
+plot_sumKinBinMeans()
+# ========================================================
+
+
+
+
+
+
+
 
 # fileName1 = 'r_glob.txt'
 # DirPath = "/home/vahid/Documents/Complex network/c/CompleteData/Run0"
@@ -21,40 +97,30 @@ plt.plot(data1)
 
 #---------------------------------------------------
 
-fileName1 = 'MeanRinEachIteration.txt'
-DirPath1 = "/home/vahid/Documents/Complex network/c/CompleteData/Run0"
-data1 = pd.read_csv(DirPath1+'/'+fileName1, header=None)
-plt.figure()
-plt.plot(data1, '-r')
-
 # DirPath_2 = "/home/vahid/Documents/Complex network/c/CompleteData/Run4"
 # data2 = pd.read_csv(DirPath_2+'/'+fileName1, header=None)
 # plt.figure()
 # plt.plot(data1, '-r', data2, '-g')
 
 #--------------------------------------------
-fileName1 = 'acceptanceRateRewiring.txt'
-DirPath1 = "/home/vahid/Documents/Complex network/c/CompleteData/Run0"
-data1 = pd.read_csv(DirPath1+'/'+fileName1, header=None)
-plt.figure()
-plt.plot(data1, '-r')
+
 # DirPath2 = "/home/vahid/Documents/Complex network/c/CompleteData/Run4"
 # data2 = pd.read_csv(DirPath2+'/'+fileName1, header=None)
 # plt.figure()
 # plt.plot(data1, '-r', data2, '-g')
 
+#---------------------------------------------------
 
-#--------------------------------------------
 
-#fileName1 = 'sumKin.txt'
-#fileName2 = 'Omega.txt'
-#DirPath = "/home/fatemeh/Documents/ComplexNetwork/CompleteData/Run1"
-#data1_degree = pd.read_csv(DirPath+'/'+fileName1, header=None)
-#data_omega = pd.read_csv(DirPath+'/'+fileName2, header=None)
-#DirPath_2 = "/home/fatemeh/Documents/ComplexNetwork/CompleteData/Run2"
-#data2_degree = pd.read_csv(DirPath_2+'/'+fileName1, header=None)
-#plt.figure()
-#plt.plot(data1_degree, abs(data_omega), 'r*', data2_degree, abs(data_omega), 'g*')
+# fileName1 = 'sumKin.txt'
+# fileName2 = 'Omega.txt'
+# DirPath = "/home/fatemeh/Documents/ComplexNetwork/CompleteData/Run1"
+# data1_degree = pd.read_csv(DirPath+'/'+fileName1, header=None)
+# data_omega = pd.read_csv(DirPath+'/'+fileName2, header=None)
+# DirPath_2 = "/home/fatemeh/Documents/ComplexNetwork/CompleteData/Run2"
+# data2_degree = pd.read_csv(DirPath_2+'/'+fileName1, header=None)
+# plt.figure()
+# plt.plot(data1_degree, abs(data_omega), 'r*', data2_degree, abs(data_omega), 'g*')
 
 #---------------------------------------------------
 
@@ -78,16 +144,6 @@ plt.plot(data1, '-r')
 #plt.figure()
 #plt.plot(data, '+-')
 
-#---------------------------------------------------
-
-# fileName1 = 'sumKin_bin_means.txt'
-# fileName2 = 'sliceOfOmega.txt'
-# #DirPath = "/home/fatemeh/Documents/ComplexNetwork/CompleteData/Run1"
-# DirPath1 = "/home/vahid/Documents/Complex network/c/CompleteData/Run0"
-# data1_mean_degree = pd.read_csv(DirPath1+'/'+fileName1, header=None)
-# data_omega = pd.read_csv(DirPath1+'/'+fileName2, header=None)
-# plt.figure()
-# plt.plot(data_omega, data1_mean_degree, 'r*')
 
 #---------------------------------------------------
 
@@ -145,4 +201,4 @@ plt.plot(data1, '-r')
 # plt.plot(data6, '*')
 
 
-plt.show()
+#plt.show()

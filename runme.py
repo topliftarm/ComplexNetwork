@@ -73,28 +73,31 @@ def configGraph():
     Adj = adj_mat.reshape(-1)
     InitialSumKin = np.array([sum(adj_mat.T[i]) for i in range(NumberOfNodes)])
     #degree = np.sum(adj_mat, axis=1)
-    Omega = np.random.uniform(-1, 1, size=NumberOfNodes).tolist()
+    l = np.linspace(-1,+1,21)
+    Omega = l.repeat(5,0)
+    np.random.shuffle(Omega)
+    #Omega = np.random.uniform(-1, 1, size=NumberOfNodes).tolist()
     InitialCondition = np.random.normal(0, pi/2, NumberOfNodes).tolist()
 
     return Adj, adj_mat, InitialSumKin, Omega, InitialCondition;
 
 def configParameters():
     print("configuration...\n")
-    seed = 15378
+    seed = 15778
     np.random.seed(seed)
-    NumberOfNodes = 100
+    NumberOfNodes = 105
     NumberOfEdges = 6
     couplingStrength = 0.27
-    NumberOfIterations = 10000
-    NumbertOfSteps = 1000
+    NumberOfIterations = 5000
+    NumbertOfSteps = 500
     rewire = True
-    NumberOfSelfishNodes = NumberOfNodes
+    NumberOfSelfishNodes = 0 # NumberOfNodes
     tfinal = 100.0
     tinitial = 0.0
     dt = 0.1
     times = np.arange(0,tfinal, dt)
     graph  = make_graph()
-    numberOfBins = 2
+    numberOfBins = 20
     return (rewire, NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
             NumbertOfSteps, tfinal, tinitial, dt, times, graph, numberOfBins)
 
@@ -146,8 +149,9 @@ hour = currentTime.hour;
 start = time()
 #motherDirPath = "/storage/users/fbaharifard/ComplexNetworks/CompleteData"
 motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData"
-runNumber = 0
-while(runNumber < 1): #hour < 14):
+runNumber = 50
+while(runNumber < 51): #hour < 14):
+    NumberOfSelfishNodes = runNumber
     currentPath = createDir(runNumber, motherDirPath)
     initialList = {
         'NumberOfNodes.txt':NumberOfNodes,
@@ -163,17 +167,7 @@ while(runNumber < 1): #hour < 14):
     print("start simulation...")
     obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
                    InitialCondition, Omega, NumbertOfSteps, NumberOfIterations)
-    sol = obj.integrate(Adj, rewire=rewire, selfish=False, NumberOfSelfishNodes=NumberOfSelfishNodes)
-    '''
-    if (runNumber == 1):
-        obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
-                   InitialCondition, Omega, NumbertOfSteps, NumberOfIterations)
-        sol = obj.integrate(Adj, rewire=True, selfish=False, NumberOfSelfishNodes=0)
-    else:
-        obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
-                   InitialCondition, Omega, NumbertOfSteps, NumberOfIterations)
-        sol = obj.integrate(Adj, rewire=True, selfish=False, NumberOfSelfishNodes=2)
-    '''
+    sol = obj.integrate(Adj, rewire=rewire, currentPath=currentPath, NumberOfSelfishNodes=NumberOfSelfishNodes)
     sol = np.asarray(sol)
     r_glob, MeanRinEachIteration, acceptanceRateRewiring, \
     finalAdj,finalY, final_adj_mat, sumKin, sumKin_bin_means, \
