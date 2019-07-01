@@ -74,7 +74,7 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
 	      y = IC;
         for(int i=0; i<NumberOfIterations; i++){
              std::cout<<"without Rewiring - Iteration = "<<i<<"\n";
- 	           y = runDynamics(NumbertOfSteps, Cij, y, MeanYPrimeAccepted);
+ 	           y = runDynamics(NumbertOfSteps, Cij, y, MeanYPrimeAccepted, -1);
              OmegaGama = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
              std::cout<<"OmegaGama="<<OmegaGama<<"\n";
              averageRafterRewiring = Mean(Order1,ceil(NumbertOfSteps/2));
@@ -87,7 +87,7 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
           int TotalNonSelfishRewiringAccepted = 0;
 	        TotalRewiring = 0;
           //MeanYPrimeAccepted.clear();
-          y = runDynamics(NumbertOfSteps, Cij, IC, MeanYPrimeAccepted);
+          y = runDynamics(NumbertOfSteps, Cij, IC, MeanYPrimeAccepted, -1);
 	        OmegaGama = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
           //OldAcceptedY = y;
           averageRbeforRewiring = Mean(Order1, ceil(NumbertOfSteps/2));
@@ -112,7 +112,7 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
               TotalRewiring++;
               //MeanYPrimeAccepted.clear();
               //NewY = runDynamics(NumbertOfSteps, NewCij, y, MeanYPrimeAccepted);
-              NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrimeAccepted);
+              NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrimeAccepted, randomNode);
               OmegaGamaPrime = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
               averageRafterRewiring = Mean(Order1,ceil(NumbertOfSteps/2));
               MeanRinEachIteration.push_back(averageRafterRewiring);
@@ -166,19 +166,43 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
       FinalY = y;
 }
 /*------------------------------------------------------------*/
-dim1 ODE::runDynamics(int _NumbertOfSteps, dim2 _Cij, dim1 _y, dim1 &MeanYPrime){
-    dim1 r1, r2;
-    double lastPushMeanYPrime;
-    for(int i=0; i<_NumbertOfSteps; i++){
-        //std::cout<<"step = "<<i<<"\n";
-        r1 = order_parameter(_y);
-        Order1.push_back(r1[0]);
-        Psi1.push_back(r1[1]);
-        _y = runge_kutta4_integrator(_y, _Cij);
-        lastPushMeanYPrime = Mean(dydt(_y, _Cij), 0);
-        MeanYPrime.push_back(lastPushMeanYPrime);
+dim1 ODE::runDynamics(int _NumbertOfSteps, dim2 _Cij, dim1 _y, dim1 &MeanYPrime, int focusNode){
+    if(focusNode==-1){
+      dim1 r1, r2;
+      double lastPushMeanYPrime;
+      for(int i=0; i<_NumbertOfSteps; i++){
+          //std::cout<<"step = "<<i<<"\n";
+          r1 = order_parameter(_y);
+          Order1.push_back(r1[0]);
+          Psi1.push_back(r1[1]);
+          _y = runge_kutta4_integrator(_y, _Cij);
+          lastPushMeanYPrime = Mean(dydt(_y, _Cij), 0);
+          MeanYPrime.push_back(lastPushMeanYPrime);
+        }
+      return _y;
+    }else{
+      dim1 r1, r2, tehtaPrimes, neighbors, neighborsTehtaPrimes;
+
+      for(int i=0; i<N; i++)
+        neighbors.push_back(_Cij[focusNode][i]);
+      neighbors[focusNode] = 1;
+
+      double lastPushMeanYPrime;
+      for(int i=0; i<_NumbertOfSteps; i++){
+          //std::cout<<"step = "<<i<<"\n";
+          r1 = order_parameter(_y);
+          Order1.push_back(r1[0]);
+          Psi1.push_back(r1[1]);
+          _y = runge_kutta4_integrator(_y, _Cij);
+          tehtaPrimes = dydt(_y, _Cij);
+          for(int ii=0; ii<N; ii++)
+            neighborsTehtaPrimes.push_back(tehtaPrimes[ii]*neighbors[ii]);
+
+          lastPushMeanYPrime = Mean(neighborsTehtaPrimes, 0);
+          MeanYPrime.push_back(lastPushMeanYPrime);
+        }
+      return _y;
     }
-    return _y;
 }
 /*------------------------------------------------------------*/
 dim2 ODE::rewiring(int indexFocusNode, dim1 nodesOrder, dim2 _Cij){

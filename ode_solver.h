@@ -59,7 +59,7 @@ public:
   double Mean(const dim1&, int);
   dim1 getMeanYPrime();
   dim1 getFinalY();
-  dim1 runDynamics(int, dim2, dim1, dim1&);
+  dim1 runDynamics(int, dim2, dim1, dim1&, int);
 
   dim1 MeanRinEachIteration;
   void integrate(const dim1& iAdj, bool rewire, string currentPath, int NumberOfSelfishNodes);
