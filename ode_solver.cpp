@@ -184,6 +184,7 @@ dim1 ODE::runDynamics(int _NumbertOfSteps, dim2 _Cij, dim1 _y, dim1 &MeanYPrime,
       dim1 r1, r2, tehtaPrimes, neighbors, neighborsTehtaPrimes;
 
       for(int i=0; i<N; i++)
+        //neighbors.push_back(max(_Cij[focusNode][i], _Cij[i][focusNode]));
         neighbors.push_back(_Cij[focusNode][i]);
       neighbors[focusNode] = 1;
 
