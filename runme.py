@@ -68,8 +68,9 @@ def configGraph():
     _Adj = graph.random_k_out_graph(NumberOfNodes, NumberOfEdges, seed=np.random.randint(100000))
     adj_mat_with_parallel_edges = np.asarray(_Adj).reshape((NumberOfNodes, NumberOfNodes))
     adj_mat_with_Bi_edges = deleteParallelEdges(adj_mat_with_parallel_edges, NumberOfNodes)
-    adj_mat_LowDegree = deleteBiEdges(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfEdges)
-    adj_mat = FixDegree(adj_mat_LowDegree, NumberOfNodes, NumberOfEdges)
+    #adj_mat_LowDegree = deleteBiEdges(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfEdges)
+    #adj_mat = FixDegree(adj_mat_LowDegree, NumberOfNodes, NumberOfEdges)
+    adj_mat = FixDegree(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfEdges)
     Adj = adj_mat.reshape(-1)
     InitialSumKin = np.array([sum(adj_mat.T[i]) for i in range(NumberOfNodes)])
     #degree = np.sum(adj_mat, axis=1)
@@ -88,17 +89,16 @@ def configParameters():
     NumberOfNodes = 105
     NumberOfEdges = 6
     couplingStrength = 0.27
-    NumberOfIterations = 5000
-    NumbertOfSteps = 500
+    NumberOfIterations = 10000
+    NumbertOfSteps = 400
     rewire = True
-    NumberOfSelfishNodes = 0 # NumberOfNodes
     tfinal = 100.0
     tinitial = 0.0
     dt = 0.1
     times = np.arange(0,tfinal, dt)
     graph  = make_graph()
     numberOfBins = 20
-    return (rewire, NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
+    return (rewire, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
             NumbertOfSteps, tfinal, tinitial, dt, times, graph, numberOfBins)
 
 def createDir(runNumber, motherDirPath):
@@ -136,8 +136,8 @@ def getParametersFromC():
 
 # ===================================== --------- ========================
 
-#make()
-rewire, NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, \
+make()
+rewire, NumberOfNodes, NumberOfEdges, couplingStrength, \
 NumberOfIterations, NumbertOfSteps, tfinal, tinitial, \
 dt, times, graph, numberOfBins = configParameters()
 
@@ -149,8 +149,8 @@ hour = currentTime.hour;
 start = time()
 #motherDirPath = "/storage/users/fbaharifard/ComplexNetworks/CompleteData"
 motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData"
-runNumber = 50
-while(runNumber < 51): #hour < 14):
+runNumber = 15
+while(runNumber < 16): #hour < 14):
     NumberOfSelfishNodes = runNumber
     currentPath = createDir(runNumber, motherDirPath)
     initialList = {
