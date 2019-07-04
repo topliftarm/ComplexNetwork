@@ -35,10 +35,10 @@ def configParameters():
     NumberOfNodes = 105
     NumberOfEdges = 6
     couplingStrength = 0.27
-    NumberOfIterations = 10000
-    NumbertOfSteps = 600
+    NumberOfIterations = 60000
+    NumbertOfSteps = 500
     rewire = True
-    NumberOfSelfishNodes = NumberOfNodes
+    NumberOfSelfishNodes = 23 #NumberOfNodes
     tfinal = 100.0
     tinitial = 0.0
     dt = 0.1
@@ -110,9 +110,9 @@ hour = currentTime.hour;
 start = time()
 #motherDirPath = "/storage/users/fbaharifard/ComplexNetworks/CompleteData"
 motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData/continueData"
-runNumber = 20
-while(runNumber < 30): #hour < 14):
-    NumberOfSelfishNodes = runNumber
+runNumber = 0
+while(runNumber < 1): #hour < 14):
+    #NumberOfSelfishNodes = runNumber
     currentPath = createDir(runNumber, motherDirPath)
     initialList = {
         'NumberOfNodes.txt':NumberOfNodes,

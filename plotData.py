@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os
@@ -18,7 +19,7 @@ def plot_rglob():
     plt.title(Name)
     print(DirPath1+'/'+Name+'.png')
     plt.savefig(DirPath1+'/'+Name+'.png')
-    # plt.show()
+    #plt.show()
 
 # --------------------------------------------------------
 def plot_MeanRinEachIteration():
@@ -30,7 +31,7 @@ def plot_MeanRinEachIteration():
     plt.plot(data1, '-r')
     plt.title(Name)
     plt.savefig(DirPath1+'/'+Name+'.png')
-    #plt.show()
+    # plt.show()
 
 # --------------------------------------------------------
 def plot_acceptanceRateRewiring():
@@ -56,7 +57,24 @@ def plot_sumKinBinMeans():
     plt.plot(data_omega, data1_mean_degree, 'r*')
     plt.title(Name)
     plt.savefig(DirPath1+'/'+Name+'.png')
-    #plt.show()
+    # plt.show()
+
+# --------------------------------------------------------
+def plot_sumKin():
+    Name = 'sumKin'
+    fileName1 = Name + '.txt'
+    fileName2 = 'Omega.txt'
+    fileName3 = 'selfishNodes.txt'
+    DirPath1 = dirPath+'/'+dirName
+    data1_degree = pd.read_csv(DirPath1+'/'+fileName1, header=None)
+    data_omega = pd.read_csv(DirPath1+'/'+fileName2, header=None)
+    data_selfishName = np.array(pd.read_csv(DirPath1+'/'+fileName3, header=None).values).reshape(-1)
+    plt.figure(figsize=(15, 15), dpi=120)
+    plt.plot(data_omega, data1_degree, 'r*', data_omega[0][data_selfishName], data1_degree[0][data_selfishName], 'g*',)
+    plt.legend(('Non Selfish Nodes', 'Selfish Nodes'), loc='upper right')
+    plt.title(Name)
+    plt.savefig(DirPath1+'/'+Name+'.png')
+    # plt.show()
 
 # ========================================================
 dirName = sys.argv[1]
@@ -71,11 +89,15 @@ elif (len(sys.argv)==3):
     print("argv==3")
     dirPath = sys.argv[2]
 
+
 print(dirPath+'/'+dirName)
 plot_rglob()
 plot_MeanRinEachIteration()
 plot_acceptanceRateRewiring()
 plot_sumKinBinMeans()
+plot_sumKin()
+
+plt.show()
 # ========================================================
 
 
