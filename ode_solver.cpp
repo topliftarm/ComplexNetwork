@@ -60,7 +60,7 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
     Cij = reshape_2d(iAdj);
     int sumAcceptanceRewirig=0;
     std::cout.precision(10);
-    dim1 y, NewY, OldAcceptedY, MeanYPrimeAccepted;
+    dim1 y, NewY, OldAcceptedY, MeanYPrime;
     dim1 RGlobalBeforeRewiring, RGlobalAfterRewiring;
     double averageRbeforRewiring, averageRafterRewiring;
     double OmegaGama, OmegaGamaPrime;
@@ -74,8 +74,8 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
 	      y = IC;
         for(int i=0; i<NumberOfIterations; i++){
              std::cout<<"without Rewiring - Iteration = "<<i<<"\n";
- 	           y = runDynamics(NumbertOfSteps, Cij, y, MeanYPrimeAccepted, -1);
-             OmegaGama = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
+ 	           y = runDynamics(NumbertOfSteps, Cij, y, MeanYPrime, -1);
+             OmegaGama = Mean(MeanYPrime, ceil(NumbertOfSteps/2));
              std::cout<<"OmegaGama="<<OmegaGama<<"\n";
              averageRafterRewiring = Mean(Order1,ceil(NumbertOfSteps/2));
              MeanRinEachIteration.push_back(averageRafterRewiring);
@@ -87,8 +87,8 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
           int TotalNonSelfishRewiringAccepted = 0;
 	        TotalRewiring = 0;
           //MeanYPrimeAccepted.clear();
-          y = runDynamics(NumbertOfSteps, Cij, IC, MeanYPrimeAccepted, -1);
-	        OmegaGama = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
+          y = runDynamics(NumbertOfSteps, Cij, IC, MeanYPrime, -1);
+	        OmegaGama = Mean(MeanYPrime, ceil(NumbertOfSteps/2));
           //OldAcceptedY = y;
           averageRbeforRewiring = Mean(Order1, ceil(NumbertOfSteps/2));
           MeanRinEachIteration.push_back(averageRbeforRewiring);
@@ -96,13 +96,22 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
 	        selfishNodes = createSelfishList(NumberOfSelfishNodes, CopyOfNodesOrder);
 	        std::cout<<" Number Of Selfish Nodes = "<<NumberOfSelfishNodes<<"\n";
           std::cout<<" Selfish Nodes : \n";
+
+          ofstream newFile;
+        	newFile.open(currentPath+"/"+"selfishNodes"+".txt");
+        	for(int iii=0; iii<NumberOfSelfishNodes; iii++){
+        	  newFile << selfishNodes[iii] << ' ';
+            newFile<<"\n";
+        	}
+        	newFile.close();
+
 	        Print1D(selfishNodes);
           std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
           int index=0;
           for(int i=0; i<NumberOfIterations; i++){
               std::cout<<"========================================\n";
               std::cout<<"with Rewiring - Iteration = "<<i<<"\n";
-              saveMatrix(currentPath+"/"+"Adj"+to_string(i)+".txt", Cij);
+              //saveMatrix(currentPath+"/"+"Adj"+to_string(i)+".txt", Cij);
               // std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
               // randomNode = CopyOfNodesOrder[0];
               if(index>N-1) {index=0;std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());}
@@ -111,9 +120,10 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
               NewCij = rewiring(randomNode, nodesOrder, Cij);
               TotalRewiring++;
               //MeanYPrimeAccepted.clear();
-              //NewY = runDynamics(NumbertOfSteps, NewCij, y, MeanYPrimeAccepted);
-              NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrimeAccepted, randomNode);
-              OmegaGamaPrime = Mean(MeanYPrimeAccepted, ceil(NumbertOfSteps/2));
+              NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrime, -1);
+              //NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrime, randomNode);
+
+              OmegaGamaPrime = Mean(MeanYPrime, ceil(NumbertOfSteps/2));
               averageRafterRewiring = Mean(Order1,ceil(NumbertOfSteps/2));
               MeanRinEachIteration.push_back(averageRafterRewiring);
               //auto min = std::min_element(Order1.end()-ceil(NumbertOfSteps/2), Order1.end());
@@ -122,9 +132,7 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
               //if((*max-*min)<0.1){
               if(1){
                   if(std::find(selfishNodes.begin(), selfishNodes.end(), randomNode)!= selfishNodes.end()){//Selfish check
-                     std::cout<<"Selfish check *** \n";
-                     //std::cout<<"randomNode="<<randomNode<<" Omega[randomNode]="<<Omega[randomNode]<<"\n";
-                     //std::cout<<"OmegaGamaPrime(NOW)="<<OmegaGamaPrime<<" OmegaGama(BEFORE)="<<OmegaGama<<"\n";
+                     //std::cout<<"Selfish check *** \n";
 
                      //OmegaGamaPrime = round(OmegaGamaPrime*1000)/1000.0;
                      //OmegaGama = round(OmegaGama*1000)/1000.0;
@@ -141,7 +149,7 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
                          //std::cout<<"Accepted\n";
                      }//else y = OldAcceptedY;
                   }else{ //NonSelfish check
-                        std::cout<<"NonSelfish check\n";
+                        //std::cout<<"NonSelfish check\n";
                         if (averageRbeforRewiring < averageRafterRewiring){
                            OmegaGama = OmegaGamaPrime;
                            Cij = NewCij;
@@ -159,8 +167,8 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
                   std::cout<<"sumAcceptanceRewirig = "<<sumAcceptanceRewirig<<"\n";
                   sumAcceptanceRewirig = 0;
               }
-              std::cout<<"TotalSelfishRewiringAccepted = "<<TotalSelfishRewiringAccepted<<"\n";
-              std::cout<<"TotalNonSelfishRewiringAccepted = "<<TotalNonSelfishRewiringAccepted<<"\n";
+              //std::cout<<"TotalSelfishRewiringAccepted = "<<TotalSelfishRewiringAccepted<<"\n";
+              //std::cout<<"TotalNonSelfishRewiringAccepted = "<<TotalNonSelfishRewiringAccepted<<"\n";
           }//end !selfish
       }
       FinalY = y;
@@ -184,10 +192,9 @@ dim1 ODE::runDynamics(int _NumbertOfSteps, dim2 _Cij, dim1 _y, dim1 &MeanYPrime,
       dim1 r1, r2, tehtaPrimes, neighbors, neighborsTehtaPrimes;
 
       for(int i=0; i<N; i++)
-        //neighbors.push_back(max(_Cij[focusNode][i], _Cij[i][focusNode]));
-        neighbors.push_back(_Cij[focusNode][i]);
+        neighbors.push_back(max(_Cij[focusNode][i], _Cij[i][focusNode]));
+        //neighbors.push_back(_Cij[focusNode][i]);
       neighbors[focusNode] = 1;
-
       double lastPushMeanYPrime;
       for(int i=0; i<_NumbertOfSteps; i++){
           //std::cout<<"step = "<<i<<"\n";
@@ -198,7 +205,6 @@ dim1 ODE::runDynamics(int _NumbertOfSteps, dim2 _Cij, dim1 _y, dim1 &MeanYPrime,
           tehtaPrimes = dydt(_y, _Cij);
           for(int ii=0; ii<N; ii++)
             neighborsTehtaPrimes.push_back(tehtaPrimes[ii]*neighbors[ii]);
-
           lastPushMeanYPrime = Mean(neighborsTehtaPrimes, 0);
           MeanYPrime.push_back(lastPushMeanYPrime);
         }
@@ -234,8 +240,7 @@ dim2 ODE::rewiring(int indexFocusNode, dim1 nodesOrder, dim2 _Cij){
       if(j==N){std::cout<< "can not Find Proper Edges for insert! ---------- \n"; break;}
       if(_Cij[indexFocusNode][nodesOrder[j]]==0 &&
         (indexFocusNode != nodesOrder[j]) &&
-        (RemovedNodeIndex != nodesOrder[j]) &&
-        (_Cij[nodesOrder[j]][indexFocusNode]==0) ){
+        (RemovedNodeIndex != nodesOrder[j])){
           _Cij[indexFocusNode][nodesOrder[j]] = 1;
           InsertNodeIndex = nodesOrder[j];
           exit = 1;
