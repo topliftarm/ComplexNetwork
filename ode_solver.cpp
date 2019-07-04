@@ -48,7 +48,15 @@ void ODE::saveMatrix(string fileName, dim2 data){
 	}
 	newFile.close();
 }
+/*------------------------------------------------------------*/
+int ODE::calBiEdges(dim2 Cij){
+  int sum = 0;
+  for(int i=0; i<N; i++)
+    for(int j=0; j<N; j++)
+      if (Cij[i][j] && (Cij[i][j]==Cij[j][i])) sum++;
 
+  return sum;
+}
 /*------------------------------------------------------------*/
 void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int NumberOfSelfishNodes=0)
 {
@@ -120,8 +128,8 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
               NewCij = rewiring(randomNode, nodesOrder, Cij);
               TotalRewiring++;
               //MeanYPrimeAccepted.clear();
-              NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrime, -1);
-              //NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrime, randomNode);
+              NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrime, -1); // Global Omega
+              //NewY = runDynamics(NumbertOfSteps, NewCij, IC, MeanYPrime, randomNode); // Local Omega
 
               OmegaGamaPrime = Mean(MeanYPrime, ceil(NumbertOfSteps/2));
               averageRafterRewiring = Mean(Order1,ceil(NumbertOfSteps/2));
@@ -167,6 +175,7 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
                   std::cout<<"sumAcceptanceRewirig = "<<sumAcceptanceRewirig<<"\n";
                   sumAcceptanceRewirig = 0;
               }
+              std::cout<<calBiEdges(Cij)<<"\n";
               //std::cout<<"TotalSelfishRewiringAccepted = "<<TotalSelfishRewiringAccepted<<"\n";
               //std::cout<<"TotalNonSelfishRewiringAccepted = "<<TotalNonSelfishRewiringAccepted<<"\n";
           }//end !selfish

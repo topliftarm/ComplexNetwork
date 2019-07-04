@@ -60,6 +60,7 @@ public:
   dim1 getMeanYPrime();
   dim1 getFinalY();
   dim1 runDynamics(int, dim2, dim1, dim1&, int);
+  int calBiEdges(dim2);
 
   dim1 MeanRinEachIteration;
   void integrate(const dim1& iAdj, bool rewire, string currentPath, int NumberOfSelfishNodes);
