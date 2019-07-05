@@ -195,6 +195,11 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
                   saveArray(currentPath+"/"+"MeanRinEachIteration.txt", MeanRinEachIteration);
                   std::cout<<"done\n";
                   MeanRinEachIteration.clear();
+
+                  std::cout<<"Saving acceptanceRateRewiring...";
+                  saveArray(currentPath+"/"+"acceptanceRateRewiring.txt", AcceptanceRateRewiring);
+                  std::cout<<"done\n";
+                  AcceptanceRateRewiring.clear();
               }
               std::cout<<"BiEdges="<<calBiEdges(Cij)<<"\n";
               //std::cout<<"TotalSelfishRewiringAccepted = "<<TotalSelfishRewiringAccepted<<"\n";
@@ -212,6 +217,11 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
       saveArray(currentPath+"/"+"MeanRinEachIteration.txt", MeanRinEachIteration);
       std::cout<<"done\n";
       MeanRinEachIteration.clear();
+
+      std::cout<<"Saving acceptanceRateRewiring...";
+      saveArray(currentPath+"/"+"acceptanceRateRewiring.txt", AcceptanceRateRewiring);
+      std::cout<<"done\n";
+      AcceptanceRateRewiring.clear();
 }
 /*------------------------------------------------------------*/
 dim1 ODE::runDynamics(int _NumbertOfSteps, dim2 _Cij, dim1 _y, dim1 &MeanYPrime, int focusNode){
