@@ -74,10 +74,10 @@ def configGraph():
     Adj = adj_mat.reshape(-1)
     InitialSumKin = np.array([sum(adj_mat.T[i]) for i in range(NumberOfNodes)])
     #degree = np.sum(adj_mat, axis=1)
-    l = np.linspace(-1,+1,21)
-    Omega = l.repeat(5,0)
-    np.random.shuffle(Omega)
-    #Omega = np.random.uniform(-1, 1, size=NumberOfNodes).tolist()
+    #l = np.linspace(-1,+1,21)
+    #Omega = l.repeat(5,0)
+    #np.random.shuffle(Omega)
+    Omega = np.random.uniform(-1, 1, size=NumberOfNodes).tolist()
     InitialCondition = np.random.normal(0, pi/2, NumberOfNodes).tolist()
 
     return Adj, adj_mat, InitialSumKin, Omega, InitialCondition;
@@ -86,11 +86,11 @@ def configParameters():
     print("configuration...\n")
     seed = 15778
     np.random.seed(seed)
-    NumberOfNodes = 105
+    NumberOfNodes = 100
     NumberOfEdges = 6
     couplingStrength = 0.27
-    NumberOfIterations = 10000
-    NumbertOfSteps = 400
+    NumberOfIterations = 200
+    NumbertOfSteps = 1000
     rewire = True
     tfinal = 100.0
     tinitial = 0.0
@@ -149,9 +149,10 @@ hour = currentTime.hour;
 start = time()
 #motherDirPath = "/storage/users/fbaharifard/ComplexNetworks/CompleteData"
 motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData"
-runNumber = 15
-while(runNumber < 16): #hour < 14):
-    NumberOfSelfishNodes = runNumber
+
+NumberOfSelfishNodes = 100
+runNumber = 0
+while(runNumber < 1): #hour < 14):
     currentPath = createDir(runNumber, motherDirPath)
     initialList = {
         'NumberOfNodes.txt':NumberOfNodes,
@@ -177,9 +178,9 @@ while(runNumber < 16): #hour < 14):
     finalList = {
         'FinalAdj.txt':final_adj_mat,
         'acceptanceRateRewiring.txt':np.array(acceptanceRateRewiring).T,
-        'MeanRinEachIteration.txt':np.array(MeanRinEachIteration).T,
+        #'MeanRinEachIteration.txt':np.array(MeanRinEachIteration).T,
         'finalY.txt':np.array(finalY).T,
-        'r_glob.txt':np.array(r_glob).T,
+        #'r_glob.txt':np.array(r_glob).T,
         'sumKin.txt':np.array(sumKin).T,
         'sumKin_bin_means.txt':np.array(sumKin_bin_means).T,
         'sliceOfOmega.txt':np.array(sliceOfOmega).T

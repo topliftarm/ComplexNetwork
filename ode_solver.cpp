@@ -49,6 +49,17 @@ void ODE::saveMatrix(string fileName, dim2 data){
 	newFile.close();
 }
 /*------------------------------------------------------------*/
+void ODE::saveArray(string fileName, dim1 data){
+  ofstream newFile;
+  newFile.open(fileName, std::ios_base::app);
+  int N = data.size();
+  for(int iii=0; iii<N; iii++){
+    newFile << data[iii] << ' ';
+    newFile<<"\n";
+  }
+  newFile.close();
+}
+/*------------------------------------------------------------*/
 int ODE::calBiEdges(dim2 Cij){
   int sum = 0;
   for(int i=0; i<N; i++)
@@ -170,17 +181,37 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
                          }//else y = OldAcceptedY;
                   }
               } else std::cout<<"Not Reached to Stationary State !!!!!!!!!!!!!!!!!!!!! \n";
-              if(i % 100 == 0){
+              if(i % 200 == 0){
                   AcceptanceRateRewiring.push_back(sumAcceptanceRewirig);
                   std::cout<<"sumAcceptanceRewirig = "<<sumAcceptanceRewirig<<"\n";
                   sumAcceptanceRewirig = 0;
+
+                  std::cout<<"Saving r_glob...";
+                  saveArray(currentPath+"/"+"r_glob.txt", Order1);
+                  std::cout<<"done\n";
+                  Order1.clear();
+
+                  std::cout<<"Saving MeanRinEachIteration...";
+                  saveArray(currentPath+"/"+"MeanRinEachIteration.txt", MeanRinEachIteration);
+                  std::cout<<"done\n";
+                  MeanRinEachIteration.clear();
               }
-              std::cout<<calBiEdges(Cij)<<"\n";
+              std::cout<<"BiEdges="<<calBiEdges(Cij)<<"\n";
               //std::cout<<"TotalSelfishRewiringAccepted = "<<TotalSelfishRewiringAccepted<<"\n";
               //std::cout<<"TotalNonSelfishRewiringAccepted = "<<TotalNonSelfishRewiringAccepted<<"\n";
           }//end !selfish
       }
       FinalY = y;
+
+      std::cout<<"Saving r_glob...";
+      saveArray(currentPath+"/"+"r_glob.txt", Order1);
+      std::cout<<"done\n";
+      Order1.clear();
+
+      std::cout<<"Saving MeanRinEachIteration...";
+      saveArray(currentPath+"/"+"MeanRinEachIteration.txt", MeanRinEachIteration);
+      std::cout<<"done\n";
+      MeanRinEachIteration.clear();
 }
 /*------------------------------------------------------------*/
 dim1 ODE::runDynamics(int _NumbertOfSteps, dim2 _Cij, dim1 _y, dim1 &MeanYPrime, int focusNode){
@@ -191,7 +222,7 @@ dim1 ODE::runDynamics(int _NumbertOfSteps, dim2 _Cij, dim1 _y, dim1 &MeanYPrime,
           //std::cout<<"step = "<<i<<"\n";
           r1 = order_parameter(_y);
           Order1.push_back(r1[0]);
-          Psi1.push_back(r1[1]);
+          //Psi1.push_back(r1[1]);
           _y = runge_kutta4_integrator(_y, _Cij);
           lastPushMeanYPrime = Mean(dydt(_y, _Cij), 0);
           MeanYPrime.push_back(lastPushMeanYPrime);

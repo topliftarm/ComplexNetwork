@@ -93,9 +93,9 @@ elif (len(sys.argv)==3):
 print(dirPath+'/'+dirName)
 plot_rglob()
 plot_MeanRinEachIteration()
-plot_acceptanceRateRewiring()
-plot_sumKinBinMeans()
-plot_sumKin()
+#plot_acceptanceRateRewiring()
+#plot_sumKinBinMeans()
+#plot_sumKin()
 
 plt.show()
 # ========================================================

@@ -74,6 +74,7 @@ public:
   void set_matrices(const dim1& iAdj);
   dim1 getCij();
   void saveMatrix(string fileName, dim2 data);
+  void saveArray(string fileName, dim1 data);
 
   dim1 IC;
 };
