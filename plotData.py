@@ -76,6 +76,24 @@ def plot_sumKin():
     plt.savefig(DirPath1+'/'+Name+'.png')
     # plt.show()
 
+# --------------------------------------------------------
+def plot_degreeBasedOnU():
+    fileName1 = 'u.txt'
+    fileName2 = 'FinalAdj.txt'
+    DirPath1 = dirPath+'/'+dirName
+    data1_u = pd.read_csv(DirPath1+'/'+fileName1, header=None)
+    data2_adj = np.loadtxt(DirPath1+'/'+fileName2).reshape(-1, 100*100).ravel().tolist()
+    data2_adj = np.asarray(data2_adj).reshape((100,100))
+    allDegree = np.sum(data2_adj, axis=0)
+    # degree = list()
+    # [degree.append(allDegree[i]) for i in range(100)]
+    plt.figure(figsize=(15, 15), dpi=120)
+    plt.plot(data1_u, allDegree)
+    plt.title(' degreeBasedOnU ')
+    plt.savefig(DirPath1+'/'+'degreeBasedOnU'+'.png')
+    # plt.show()
+
+
 # ========================================================
 dirName = sys.argv[1]
 
@@ -96,6 +114,7 @@ plot_MeanRinEachIteration()
 plot_acceptanceRateRewiring()
 #plot_sumKinBinMeans()
 #plot_sumKin()
+plot_degreeBasedOnU()
 
 plt.show()
 # ========================================================
