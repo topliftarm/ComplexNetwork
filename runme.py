@@ -7,6 +7,7 @@ from network import make_graph
 from modules import *
 from numpy import pi
 import matplotlib.pyplot as plt
+import math
 
 # ===================================== functions ========================
 def make():
@@ -62,12 +63,32 @@ def FixDegree(adj_mat_LowDegree, NumberOfNodes, NumberOfEdges):
 
     return adj_mat_LowDegree
 
+def addBiEdges(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfBiEdges):
+    for i in range(NumberOfBiEdges):
+        index_ = np.random.randint(1, NumberOfNodes, size=2)
+        x, y = index_[0], index_[1]
+        if(adj_mat_with_Bi_edges[x][y] == 0):
+           if(adj_mat_with_Bi_edges[y][x] == 0):
+              index = np.where(adj_mat_with_Bi_edges[x]>0)
+              index = np.concatenate(index).tolist()
+              index = np.random.permutation(index)
+              adj_mat_with_Bi_edges[x][index[0]] = 0
+              index = np.where(adj_mat_with_Bi_edges[y]>0)
+              index = np.concatenate(index).tolist()
+              index = np.random.permutation(index)
+              adj_mat_with_Bi_edges[y][index[0]] = 0
+
+              adj_mat_with_Bi_edges[x][y] = 1
+              adj_mat_with_Bi_edges[y][x] = 1
+    return adj_mat_with_Bi_edges
+
 def configGraph():
     #Adj = graph.barabasi(NumberOfNodes, m=2)
     #Adj = graph.erdos_renyi_graph(NumberOfNodes, 0.04)
     _Adj = graph.random_k_out_graph(NumberOfNodes, NumberOfEdges, seed=np.random.randint(100000))
     adj_mat_with_parallel_edges = np.asarray(_Adj).reshape((NumberOfNodes, NumberOfNodes))
     adj_mat_with_Bi_edges = deleteParallelEdges(adj_mat_with_parallel_edges, NumberOfNodes)
+    # adj_mat_with_Bi_edges = addBiEdges(adj_mat_with_Bi_edges, NumberOfNodes, 50)
     #adj_mat_LowDegree = deleteBiEdges(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfEdges)
     #adj_mat = FixDegree(adj_mat_LowDegree, NumberOfNodes, NumberOfEdges)
     adj_mat = FixDegree(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfEdges)
@@ -77,19 +98,20 @@ def configGraph():
     #l = np.linspace(-1,+1,21)
     #Omega = l.repeat(5,0)
     #np.random.shuffle(Omega)
-    Omega = np.random.uniform(-1, 1, size=NumberOfNodes).tolist()
-    InitialCondition = np.random.normal(0, pi/2, NumberOfNodes).tolist()
+    #Omega = np.random.uniform(-1.6, 1.6, size=NumberOfNodes).tolist()
+    Omega = np.random.normal(0, 0, size=NumberOfNodes).tolist()
+    InitialCondition = np.random.normal(0, pi/2.0, NumberOfNodes).tolist()
 
     return Adj, adj_mat, InitialSumKin, Omega, InitialCondition;
 
 def configParameters():
     print("configuration...\n")
-    seed = 15778
+    seed = 56872
     np.random.seed(seed)
     NumberOfNodes = 100
     NumberOfEdges = 6
-    couplingStrength = 0.27
-    NumberOfIterations = 200
+    couplingStrength = 0.3
+    NumberOfIterations = 1000
     NumbertOfSteps = 1000
     rewire = True
     tfinal = 100.0
@@ -150,7 +172,7 @@ start = time()
 #motherDirPath = "/storage/users/fbaharifard/ComplexNetworks/CompleteData"
 motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData"
 
-NumberOfSelfishNodes = 100
+NumberOfSelfishNodes = 70
 runNumber = 0
 while(runNumber < 1): #hour < 14):
     currentPath = createDir(runNumber, motherDirPath)
@@ -177,7 +199,7 @@ while(runNumber < 1): #hour < 14):
     del obj, sol
     finalList = {
         'FinalAdj.txt':final_adj_mat,
-        'acceptanceRateRewiring.txt':np.array(acceptanceRateRewiring).T,
+        #'acceptanceRateRewiring.txt':np.array(acceptanceRateRewiring).T,
         #'MeanRinEachIteration.txt':np.array(MeanRinEachIteration).T,
         'finalY.txt':np.array(finalY).T,
         #'r_glob.txt':np.array(r_glob).T,

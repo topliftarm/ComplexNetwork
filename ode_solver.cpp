@@ -89,6 +89,7 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
     for(int i = 0; i < N; i++)
         nodesOrder.push_back(i);
     CopyOfNodesOrder = nodesOrder;
+
     if(!rewire){
 	      y = IC;
         for(int i=0; i<NumberOfIterations; i++){
@@ -125,17 +126,18 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
         	newFile.close();
 
 	        Print1D(selfishNodes);
-          std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
+          //std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
           int index=0;
           for(int i=0; i<NumberOfIterations; i++){
               std::cout<<"========================================\n";
               std::cout<<"with Rewiring - Iteration = "<<i<<"\n";
               //saveMatrix(currentPath+"/"+"Adj"+to_string(i)+".txt", Cij);
-              // std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
-              // randomNode = CopyOfNodesOrder[0];
-              if(index>N-1) {index=0;std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());}
-              randomNode = CopyOfNodesOrder[index];
-              index++;
+              std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());
+              randomNode = CopyOfNodesOrder[0];
+              //if(index>N-1) {index=0;std::random_shuffle(CopyOfNodesOrder.begin(), CopyOfNodesOrder.end());}
+              //randomNode = CopyOfNodesOrder[index];
+              //index++;
+
               NewCij = rewiring(randomNode, nodesOrder, Cij);
               TotalRewiring++;
               //MeanYPrimeAccepted.clear();
@@ -181,11 +183,12 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
                          }//else y = OldAcceptedY;
                   }
               } else std::cout<<"Not Reached to Stationary State !!!!!!!!!!!!!!!!!!!!! \n";
-              if(i % 200 == 0){
-                  AcceptanceRateRewiring.push_back(sumAcceptanceRewirig);
-                  std::cout<<"sumAcceptanceRewirig = "<<sumAcceptanceRewirig<<"\n";
-                  sumAcceptanceRewirig = 0;
-
+              if (i % 100 == 0){
+                AcceptanceRateRewiring.push_back(sumAcceptanceRewirig);
+                std::cout<<"sumAcceptanceRewirig = "<<sumAcceptanceRewirig<<"\n";
+                sumAcceptanceRewirig = 0;
+              }
+              if(i % 10 == 0){
                   std::cout<<"Saving r_glob...";
                   saveArray(currentPath+"/"+"r_glob.txt", Order1);
                   std::cout<<"done\n";
@@ -200,6 +203,14 @@ void ODE::integrate(const dim1& iAdj,  bool rewire, string currentPath, int Numb
                   saveArray(currentPath+"/"+"acceptanceRateRewiring.txt", AcceptanceRateRewiring);
                   std::cout<<"done\n";
                   AcceptanceRateRewiring.clear();
+
+                  std::cout<<"Saving Adj...";
+                  saveMatrix(currentPath+"/"+"Adj"+to_string(i)+".txt", Cij);
+                  std::cout<<"done\n";
+
+                  std::cout<<"Saving Y...";
+                  saveArray(currentPath+"/"+"Y"+to_string(i)+".txt", y);
+                  std::cout<<"done\n";
               }
               std::cout<<"BiEdges="<<calBiEdges(Cij)<<"\n";
               //std::cout<<"TotalSelfishRewiringAccepted = "<<TotalSelfishRewiringAccepted<<"\n";
@@ -284,6 +295,7 @@ dim2 ODE::rewiring(int indexFocusNode, dim1 nodesOrder, dim2 _Cij){
     //----------------------------------------
 //std::cout<<"indexFocusNode="<<indexFocusNode<<"\n";
     //------------ Insert One Random Edge ----
+    std::random_shuffle(nodesOrder.begin(), nodesOrder.end());
     j = 0;
     exit = 0;
     while(!exit){

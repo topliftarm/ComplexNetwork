@@ -30,22 +30,21 @@ def configGraph():
 
 def configParameters():
     print("configuration...\n")
-    seed = 12358
+    seed = 17569
     np.random.seed(seed)
-    NumberOfNodes = 105
+    NumberOfNodes = 100
     NumberOfEdges = 6
     couplingStrength = 0.27
-    NumberOfIterations = 60000
+    NumberOfIterations = 100000
     NumbertOfSteps = 500
     rewire = True
-    NumberOfSelfishNodes = 23 #NumberOfNodes
     tfinal = 100.0
     tinitial = 0.0
     dt = 0.1
     times = np.arange(0,tfinal, dt)
     graph  = make_graph()
     numberOfBins = 20
-    return (rewire, NumberOfSelfishNodes, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
+    return (rewire, NumberOfNodes, NumberOfEdges, couplingStrength, NumberOfIterations,
             NumbertOfSteps, tfinal, tinitial, dt, times, graph, numberOfBins)
 
 def createDir(runNumber, motherDirPath):
@@ -98,7 +97,7 @@ def importConfigGraph(DirInitData):
 # ===================================== --------- ========================
 
 make()
-rewire, NumberOfSelfishNodes ,NumberOfNodes, NumberOfEdges,\
+rewire ,NumberOfNodes, NumberOfEdges,\
 couplingStrength, NumberOfIterations, NumbertOfSteps, \
 tfinal, tinitial, dt, times, graph, numberOfBins = configParameters()
 
@@ -110,9 +109,10 @@ hour = currentTime.hour;
 start = time()
 #motherDirPath = "/storage/users/fbaharifard/ComplexNetworks/CompleteData"
 motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData/continueData"
+
+NumberOfSelfishNodes = 100
 runNumber = 0
 while(runNumber < 1): #hour < 14):
-    #NumberOfSelfishNodes = runNumber
     currentPath = createDir(runNumber, motherDirPath)
     initialList = {
         'NumberOfNodes.txt':NumberOfNodes,
@@ -138,10 +138,10 @@ while(runNumber < 1): #hour < 14):
     del obj, sol
     finalList = {
         'FinalAdj.txt':final_adj_mat,
-        'acceptanceRateRewiring.txt':np.array(acceptanceRateRewiring).T,
-        'MeanRinEachIteration.txt':np.array(MeanRinEachIteration).T,
+        #'acceptanceRateRewiring.txt':np.array(acceptanceRateRewiring).T,
+        #'MeanRinEachIteration.txt':np.array(MeanRinEachIteration).T,
         'finalY.txt':np.array(finalY).T,
-        'r_glob.txt':np.array(r_glob).T,
+        #'r_glob.txt':np.array(r_glob).T,
         'sumKin.txt':np.array(sumKin).T,
         'sumKin_bin_means.txt':np.array(sumKin_bin_means).T,
         'sliceOfOmega.txt':np.array(sliceOfOmega).T
