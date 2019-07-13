@@ -18,7 +18,7 @@ class ODE {
   double K_Over_N;
   int num_steps;
   dim2 Coordinates;
-  dim1 Omega;
+  dim1 Omega, u;
   int sum_degree, NumbertOfSteps, NumberOfIterations;
   double couplingStrength;
   dim1 createSelfishList(int NumberOfSelfishNodes, dim1 NodesOrder);
@@ -26,7 +26,7 @@ class ODE {
 public:
   ODE(int iN, double itfinal,
       double idt,
-      double iCouplingStrength, dim1 iIC, dim1 iOmega, int _NumbertOfSteps, int _NumberOfIterations) : N(iN), dt(idt)
+      double iCouplingStrength, dim1 iIC, dim1 iOmega, int _NumbertOfSteps, int _NumberOfIterations, dim1 _u) : N(iN), dt(idt)
   {
     tfinal = itfinal;
     num_steps = int(tfinal/dt);
@@ -36,6 +36,7 @@ public:
     couplingStrength = iCouplingStrength;
     NumbertOfSteps = _NumbertOfSteps;
     NumberOfIterations = _NumberOfIterations;
+    u = _u;
 
   }
   virtual ~ODE() { }
@@ -48,7 +49,7 @@ public:
   dim1 AcceptanceRateRewiring;
   void euler_integrator(dim1 & );
   dim1 runge_kutta4_integrator(dim1 y, dim2 CijLocal);
-  dim2 rewiring(int indexFocusNode, dim1 nodesOrder, dim2);
+  dim2 rewiring(int indexFocusNode1, int indexFocusNode2, dim1 nodesOrder, dim2);
   void Print2D(dim2);
   void Print1D(dim1);
 
