@@ -84,25 +84,32 @@ def addBiEdges(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfBiEdges):
 
 def configGraph():
     #Adj = graph.barabasi(NumberOfNodes, m=2)
-    #Adj = graph.erdos_renyi_graph(NumberOfNodes, 0.04)
-    _Adj = graph.random_k_out_graph(NumberOfNodes, NumberOfEdges, seed=np.random.randint(100000))
-    adj_mat_with_parallel_edges = np.asarray(_Adj).reshape((NumberOfNodes, NumberOfNodes))
-    adj_mat_with_Bi_edges = deleteParallelEdges(adj_mat_with_parallel_edges, NumberOfNodes)
+    Adj = graph.erdos_renyi_graph(NumberOfNodes, 0.06)
+    adj_mat = np.asarray(Adj).reshape((NumberOfNodes, NumberOfNodes))
+    # _Adj = graph.random_k_out_graph(NumberOfNodes, NumberOfEdges, seed=np.random.randint(100000))
+    # adj_mat_with_parallel_edges = np.asarray(_Adj).reshape((NumberOfNodes, NumberOfNodes))
+    # adj_mat_with_Bi_edges = deleteParallelEdges(adj_mat_with_parallel_edges, NumberOfNodes)
     # adj_mat_with_Bi_edges = addBiEdges(adj_mat_with_Bi_edges, NumberOfNodes, 50)
     #adj_mat_LowDegree = deleteBiEdges(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfEdges)
     #adj_mat = FixDegree(adj_mat_LowDegree, NumberOfNodes, NumberOfEdges)
-    adj_mat = FixDegree(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfEdges)
-    Adj = adj_mat.reshape(-1)
+    # adj_mat = FixDegree(adj_mat_with_Bi_edges, NumberOfNodes, NumberOfEdges)
+    #Adj = adj_mat.reshape(-1)
     InitialSumKin = np.array([sum(adj_mat.T[i]) for i in range(NumberOfNodes)])
-    #degree = np.sum(adj_mat, axis=1)
-    #l = np.linspace(-1,+1,21)
-    #Omega = l.repeat(5,0)
-    #np.random.shuffle(Omega)
-    #Omega = np.random.uniform(-1.6, 1.6, size=NumberOfNodes).tolist()
+    # degree = np.sum(adj_mat, axis=1)
+
+    # Omega = np.random.uniform(-1.6, 1.6, size=NumberOfNodes).tolist()
     Omega = np.random.normal(0, 0, size=NumberOfNodes).tolist()
     InitialCondition = np.random.normal(0, pi/2.0, NumberOfNodes).tolist()
 
-    return Adj, adj_mat, InitialSumKin, Omega, InitialCondition;
+    l1 = list([-1,1])
+    l2 = np.random.randint(low=0, high=2, size=NumberOfNodes).tolist()
+    u = list()
+    [u.append(l1[l2[i]]) for i in range(NumberOfNodes)]
+
+    # u = np.random.uniform(-1, 1, size=NumberOfNodes).tolist()
+    u.sort()
+
+    return Adj, adj_mat, InitialSumKin, Omega, InitialCondition, u;
 
 def configParameters():
     print("configuration...\n")
@@ -112,7 +119,7 @@ def configParameters():
     NumberOfEdges = 6
     couplingStrength = 0.3
     NumberOfIterations = 1000
-    NumbertOfSteps = 1000
+    NumbertOfSteps = 500
     rewire = True
     tfinal = 100.0
     tinitial = 0.0
@@ -164,7 +171,7 @@ NumberOfIterations, NumbertOfSteps, tfinal, tinitial, \
 dt, times, graph, numberOfBins = configParameters()
 
 Adj, adj_mat, InitialSumKin, \
-Omega, InitialCondition = configGraph()
+Omega, InitialCondition, u = configGraph()
 
 currentTime = datetime.datetime.now()
 hour = currentTime.hour;
@@ -172,7 +179,7 @@ start = time()
 #motherDirPath = "/storage/users/fbaharifard/ComplexNetworks/CompleteData"
 motherDirPath = "/home/vahid/Documents/Complex network/c/CompleteData"
 
-NumberOfSelfishNodes = 70
+NumberOfSelfishNodes = 0
 runNumber = 0
 while(runNumber < 1): #hour < 14):
     currentPath = createDir(runNumber, motherDirPath)
@@ -184,12 +191,13 @@ while(runNumber < 1): #hour < 14):
         'InitAdj.txt':adj_mat,
         'Omega.txt':np.array(Omega).T,
         'Y0.txt':np.array(InitialCondition).T,
-        'InitialSumKin.txt':np.array(InitialSumKin).T
+        'InitialSumKin.txt':np.array(InitialSumKin).T,
+        'u.txt':np.array(u).T
     }
     saveData(initialList)
     print("start simulation...")
     obj = ode_solver.ODE(NumberOfNodes, tfinal, dt,	couplingStrength, \
-                   InitialCondition, Omega, NumbertOfSteps, NumberOfIterations)
+                   InitialCondition, Omega, NumbertOfSteps, NumberOfIterations, u)
     sol = obj.integrate(Adj, rewire=rewire, currentPath=currentPath, NumberOfSelfishNodes=NumberOfSelfishNodes)
     sol = np.asarray(sol)
     r_glob, MeanRinEachIteration, acceptanceRateRewiring, \
