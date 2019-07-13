@@ -29,6 +29,7 @@ fileName_adj = 'FinalAdj.txt'
 
 Adj = np.loadtxt(DirPath1+'/'+fileName_adj).reshape(-1, 100*100).ravel().tolist() 
 init_adj_mat = np.asarray(Adj).reshape((100,100))  
+print('degree=', np.sum(init_adj_mat, axis=1) )
 G=nx.from_numpy_matrix(init_adj_mat) 
 L = nx.normalized_laplacian_matrix(G).todense() 
 a = np.linalg.eig(L) 
